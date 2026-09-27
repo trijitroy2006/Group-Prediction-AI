@@ -9,6 +9,26 @@ from llm_service import generate_llm_recommendations
 
 st.set_page_config(page_title="Prediction AI", layout="wide", initial_sidebar_state="collapsed")
 
+# --- GLOBAL FONT SIZE OVERRIDE ---
+st.markdown('''
+<style>
+    /* Increase base font size for native Streamlit widgets */
+    .stTextInput label, .stSelectbox label, .stNumberInput label, .stTextArea label {
+        font-size: 18px !important;
+    }
+    .stTextInput input, .stSelectbox select, .stNumberInput input, .stTextArea textarea {
+        font-size: 16px !important;
+    }
+    .stMarkdown p, .stMarkdown li {
+        font-size: 18px !important;
+    }
+    div[data-testid="stMetricValue"] {
+        font-size: 2.2rem !important;
+    }
+</style>
+''', unsafe_allow_html=True)
+
+
 # Custom CSS to mimic the Mac-style window from the PDF
 st.markdown("""
 <style>
@@ -69,7 +89,7 @@ padding-bottom: 0 !important;
 
 # Injecting the Mac dots at the top of the container
 st.markdown("""
-<h1 style="margin: 0; padding: 0; font-size: 28px; color: #111827; font-weight: 700; font-family: sans-serif; margin-bottom: 14px; margin-top: -16px;">Prediction AI</h1>
+<h1 style="margin: 0; padding: 0; font-size: 32px; color: #111827; font-weight: 700; font-family: sans-serif; margin-bottom: 14px; margin-top: -16px;">Prediction AI</h1>
 <div class="mac-controls">
 <div class="mac-dot mac-red"></div>
 <div class="mac-dot mac-yellow"></div>
@@ -81,8 +101,8 @@ tab1, tab2, tab3, tab4 = st.tabs(["Project Input", "Risk Assessment", "Recommend
 
 with tab1:
     st.markdown("""
-<h1 style="margin: 0; padding: 0; font-size: 28px; color: #111827; font-weight: 700; font-family: sans-serif;">Data Collection & Market Intelligence</h1>
-<p style="margin: 4px 0 24px 0; color: #6B7280; font-size: 15px; font-family: sans-serif;">Gather project data and analyze market landscape</p>
+<h1 style="margin: 0; padding: 0; font-size: 32px; color: #111827; font-weight: 700; font-family: sans-serif;">Data Collection & Market Intelligence</h1>
+<p style="margin: 4px 0 24px 0; color: #6B7280; font-size: 19px; font-family: sans-serif;">Gather project data and analyze market landscape</p>
 """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
@@ -164,8 +184,8 @@ with tab1:
 
 with tab2:
     st.markdown("""
-<h1 style="margin: 0; padding: 0; font-size: 28px; color: #111827; font-weight: 700; font-family: sans-serif;">Risk Assessment & SWOT Analysis</h1>
-<p style="margin: 4px 0 24px 0; color: #6B7280; font-size: 15px; font-family: sans-serif;">AI-powered risk scoring and strategic evaluation</p>
+<h1 style="margin: 0; padding: 0; font-size: 32px; color: #111827; font-weight: 700; font-family: sans-serif;">Risk Assessment & SWOT Analysis</h1>
+<p style="margin: 4px 0 24px 0; color: #6B7280; font-size: 19px; font-family: sans-serif;">AI-powered risk scoring and strategic evaluation</p>
 """, unsafe_allow_html=True)
 
     if 'project_data' not in st.session_state:
@@ -290,37 +310,37 @@ with tab2:
         with r_col1:
             st.markdown(f"""
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-    <h3 style="margin:0; font-size: 16px; color: #111827; font-family: sans-serif;">Risk Score</h3>
-    <span style="color: #DC2626; font-size: 14px;">&#9888;</span>
+    <h3 style="margin:0; font-size: 20px; color: #111827; font-family: sans-serif;">Risk Score</h3>
+    <span style="color: #DC2626; font-size: 18px;">&#9888;</span>
     </div>
     <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 16px; background: white; font-family: sans-serif;">
-    <div style="color: #6B7280; font-size: 12px; margin-bottom: 16px;">Overall Risk Score</div>
-    <div style="color: #DC2626; font-size: 56px; font-weight: 800; line-height: 1;">{risk_score}</div>
-    <div style="color: #DC2626; font-size: 11px; font-weight: 700; margin-top: 16px;">{risk_status}</div>
+    <div style="color: #6B7280; font-size: 16px; margin-bottom: 16px;">Overall Risk Score</div>
+    <div style="color: #DC2626; font-size: 60px; font-weight: 800; line-height: 1;">{risk_score}</div>
+    <div style="color: #DC2626; font-size: 15px; font-weight: 700; margin-top: 16px;">{risk_status}</div>
     </div>
     <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; margin-bottom: 24px; background: white; font-family: sans-serif;">
-    <div style="color: #6B7280; font-size: 12px; margin-bottom: 12px;">Success Probability</div>
+    <div style="color: #6B7280; font-size: 16px; margin-bottom: 12px;">Success Probability</div>
     <div style="background: #E5E7EB; border-radius: 4px; height: 6px; width: 100%; margin-bottom: 8px;">
     <div style="background: #DC2626; border-radius: 4px; height: 100%; width: {success_probability}%;"></div>
     </div>
-    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;">
+    <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 600;">
     <span style="color: #111827;">{success_probability}%</span>
     <span style="color: #DC2626;">Low</span>
     </div>
     </div>
-    <h4 style="font-size: 14px; margin-bottom: 12px; color: #111827; font-family: sans-serif;">Key Risk Factors</h4>
+    <h4 style="font-size: 18px; margin-bottom: 12px; color: #111827; font-family: sans-serif;">Key Risk Factors</h4>
     <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; background: white; font-family: sans-serif;">
-    <div style="background: #FEF3C7; color: #D97706; padding: 6px; border-radius: 6px; font-size: 16px; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;">&#128101;</div>
+    <div style="background: #FEF3C7; color: #D97706; padding: 6px; border-radius: 6px; font-size: 20px; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;">&#128101;</div>
     <div>
-    <div style="font-size: 13px; font-weight: 600; color: #111827;">Team Expertise</div>
-    <div style="font-size: 11px; color: #6B7280;">{team_expertise} technical experience</div>
+    <div style="font-size: 17px; font-weight: 600; color: #111827;">Team Expertise</div>
+    <div style="font-size: 15px; color: #6B7280;">{team_expertise} technical experience</div>
     </div>
     </div>
     <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; background: white; font-family: sans-serif;">
-    <div style="background: #D1FAE5; color: #10B981; padding: 6px; border-radius: 6px; font-size: 16px; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;">&#128161;</div>
+    <div style="background: #D1FAE5; color: #10B981; padding: 6px; border-radius: 6px; font-size: 20px; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;">&#128161;</div>
     <div>
-    <div style="font-size: 13px; font-weight: 600; color: #111827;">Innovation Gap</div>
-    <div style="font-size: 11px; color: #6B7280;">{innovation_level} innovation potential</div>
+    <div style="font-size: 17px; font-weight: 600; color: #111827;">Innovation Gap</div>
+    <div style="font-size: 15px; color: #6B7280;">{innovation_level} innovation potential</div>
     </div>
     </div>
     """, unsafe_allow_html=True)
@@ -328,39 +348,39 @@ with tab2:
         with r_col2:
             st.markdown(f"""
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-family: sans-serif;">
-    <h3 style="margin:0; font-size: 16px; color: #111827;">SWOT Analysis</h3>
-    <span style="color: #6B7280; font-size: 16px;">&#8862;</span>
+    <h3 style="margin:0; font-size: 20px; color: #111827;">SWOT Analysis</h3>
+    <span style="color: #6B7280; font-size: 20px;">&#8862;</span>
     </div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-family: sans-serif;">
     <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 16px;">
-    <div style="color: #16A34A; font-weight: 600; font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-    <span style="background: #16A34A; color: white; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">+</span> Strengths
+    <div style="color: #16A34A; font-weight: 600; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+    <span style="background: #16A34A; color: white; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">+</span> Strengths
     </div>
-    <div style="color: #111827; font-size: 12px; line-height: 1.5;">
+    <div style="color: #111827; font-size: 16px; line-height: 1.5;">
     {format_swot(swot["Strengths"])}
     </div>
     </div>
     <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 16px;">
-    <div style="color: #DC2626; font-weight: 600; font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-    <span style="background: #DC2626; color: white; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">-</span> Weaknesses
+    <div style="color: #DC2626; font-weight: 600; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+    <span style="background: #DC2626; color: white; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">-</span> Weaknesses
     </div>
-    <div style="color: #111827; font-size: 12px; line-height: 1.5;">
+    <div style="color: #111827; font-size: 16px; line-height: 1.5;">
     {format_swot(swot["Weaknesses"])}
     </div>
     </div>
     <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 16px; min-height: 180px;">
-    <div style="color: #2563EB; font-weight: 600; font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-    <span style="color: #2563EB; font-size: 16px;">&#8599;</span> Opportunities
+    <div style="color: #2563EB; font-weight: 600; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+    <span style="color: #2563EB; font-size: 20px;">&#8599;</span> Opportunities
     </div>
-    <div style="color: #111827; font-size: 12px; line-height: 1.5;">
+    <div style="color: #111827; font-size: 16px; line-height: 1.5;">
     {format_swot(swot["Opportunities"])}
     </div>
     </div>
     <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 16px; min-height: 180px;">
-    <div style="color: #D97706; font-weight: 600; font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-    <span style="color: #D97706; font-size: 14px;">&#9888;</span> Threats
+    <div style="color: #D97706; font-weight: 600; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+    <span style="color: #D97706; font-size: 18px;">&#9888;</span> Threats
     </div>
-    <div style="color: #111827; font-size: 12px; line-height: 1.5;">
+    <div style="color: #111827; font-size: 16px; line-height: 1.5;">
     {format_swot(swot["Threats"])}
     </div>
     </div>
@@ -370,18 +390,18 @@ with tab2:
         with r_col3:
             st.markdown(f"""
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-family: sans-serif;">
-    <h3 style="margin:0; font-size: 16px; color: #111827;">Project Feasibility</h3>
-    <span style="color: white; background: #10B981; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">&#10004;</span>
+    <h3 style="margin:0; font-size: 20px; color: #111827;">Project Feasibility</h3>
+    <span style="color: white; background: #10B981; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">&#10004;</span>
     </div>
     <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 24px; background: white; font-family: sans-serif;">
-    <div style="color: #6B7280; font-size: 12px; margin-bottom: 16px;">Feasibility Score</div>
-    <div style="color: #10B981; font-size: 48px; font-weight: 800; line-height: 1;">{feasibility_score}%</div>
-    <div style="color: #9CA3AF; font-size: 10px; margin-top: 16px; line-height: 1.4; padding: 0 10px;">Moderate Feasibility with Significant Improvements Needed</div>
+    <div style="color: #6B7280; font-size: 16px; margin-bottom: 16px;">Feasibility Score</div>
+    <div style="color: #10B981; font-size: 52px; font-weight: 800; line-height: 1;">{feasibility_score}%</div>
+    <div style="color: #9CA3AF; font-size: 14px; margin-top: 16px; line-height: 1.4; padding: 0 10px;">Moderate Feasibility with Significant Improvements Needed</div>
     </div>
-    <h4 style="font-size: 14px; margin-bottom: 16px; color: #111827; font-family: sans-serif;">Assessment Metrics</h4>
+    <h4 style="font-size: 18px; margin-bottom: 16px; color: #111827; font-family: sans-serif;">Assessment Metrics</h4>
 
     <div style="margin-bottom: 16px; font-family: sans-serif;">
-    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+    <div style="display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 6px;">
     <span style="color: #374151; font-weight: 500;">Team Capability</span>
     <span style="color: #F59E0B; font-weight: 600;">{team_capability}%</span>
     </div>
@@ -390,7 +410,7 @@ with tab2:
     </div>
     </div>
     <div style="margin-bottom: 16px; font-family: sans-serif;">
-    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+    <div style="display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 6px;">
     <span style="color: #374151; font-weight: 500;">Competitive Advantage</span>
     <span style="color: #DC2626; font-weight: 600;">{competitive_advantage}%</span>
     </div>
@@ -399,7 +419,7 @@ with tab2:
     </div>
     </div>
     <div style="margin-bottom: 16px; font-family: sans-serif;">
-    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+    <div style="display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 6px;">
     <span style="color: #374151; font-weight: 500;">Resource Availability</span>
     <span style="color: #10B981; font-weight: 600;">{resource_score}%</span>
     </div>
@@ -412,8 +432,8 @@ with tab2:
 
 with tab3:
     st.markdown("""
-<h1 style="margin: 0; padding: 0; font-size: 28px; color: #111827; font-weight: 700; font-family: sans-serif;">Recommendations & Strategic Reasoning</h1>
-<p style="margin: 4px 0 24px 0; color: #6B7280; font-size: 15px; font-family: sans-serif;">AI-powered mitigation strategies and agent workflows</p>
+<h1 style="margin: 0; padding: 0; font-size: 32px; color: #111827; font-weight: 700; font-family: sans-serif;">Recommendations & Strategic Reasoning</h1>
+<p style="margin: 4px 0 24px 0; color: #6B7280; font-size: 19px; font-family: sans-serif;">AI-powered mitigation strategies and agent workflows</p>
 """, unsafe_allow_html=True)
     if 'project_data' not in st.session_state:
         st.info('Submit a project idea in the Project Input tab to view Recommendations.')
@@ -518,8 +538,8 @@ with tab3:
         with improvements_tab:
             st.markdown("""
     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-            <h3 style="margin:0; font-size: 16px; color: #111827; font-family: sans-serif;">Improvements</h3>
-            <span style="background: #6D28D9; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; font-family: sans-serif;">AI Powered</span>
+            <h3 style="margin:0; font-size: 20px; color: #111827; font-family: sans-serif;">Improvements</h3>
+            <span style="background: #6D28D9; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; font-weight: bold; font-family: sans-serif;">AI Powered</span>
             </div>
     <style>
     .improvement-card-grid {
@@ -572,13 +592,13 @@ with tab3:
     .improvement-face h4 {
         margin: 0 0 10px 0;
         color: #111827;
-        font-size: 15px;
+        font-size: 19px;
         line-height: 1.35;
     }
     .improvement-face p,
     .improvement-face li {
         color: #4B5563;
-        font-size: 12px;
+        font-size: 16px;
         line-height: 1.55;
     }
     .improvement-face ul {
@@ -587,7 +607,7 @@ with tab3:
     }
     .improvement-label {
         color: #6D28D9;
-        font-size: 10px;
+        font-size: 14px;
         font-weight: 700;
         letter-spacing: .04em;
         text-transform: uppercase;
@@ -599,13 +619,13 @@ with tab3:
         border: 1px solid rgba(196, 181, 253, 0.7);
         border-radius: 999px;
         padding: 3px 9px;
-        font-size: 10px;
+        font-size: 14px;
         font-weight: 700;
     }
     .improvement-hint {
         margin-top: 16px;
         color: #9CA3AF;
-        font-size: 10px;
+        font-size: 14px;
     }
     @media (max-width: 900px) {
         .improvement-card-grid {
@@ -658,7 +678,7 @@ with tab3:
         with risk_mitigation_tab:
             st.markdown("""
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <h3 style="margin:0; font-size: 16px; color: #111827; font-family: sans-serif;">Risk Mitigation</h3>
+    <h3 style="margin:0; font-size: 20px; color: #111827; font-family: sans-serif;">Risk Mitigation</h3>
     <span style="color: #6B7280;">&#128116;</span>
     </div>
     <style>
@@ -689,7 +709,7 @@ with tab3:
     }
     .risk-glass-card-risk {
         color: #DC2626;
-        font-size: 12px;
+        font-size: 16px;
         font-weight: 700;
         line-height: 1.4;
     }
@@ -700,19 +720,19 @@ with tab3:
         border: 1px solid rgba(110, 231, 183, 0.7);
         border-radius: 999px;
         padding: 3px 8px;
-        font-size: 10px;
+        font-size: 14px;
         font-weight: 700;
     }
     .risk-glass-card h4 {
         margin: 0 0 10px 0;
         color: #111827;
-        font-size: 13px;
+        font-size: 17px;
         line-height: 1.4;
     }
     .risk-glass-card p {
         margin: 0 0 8px 0;
         color: #4B5563;
-        font-size: 11px;
+        font-size: 15px;
         line-height: 1.5;
     }
     .risk-glass-card strong {
@@ -774,7 +794,7 @@ with tab3:
         with langgraph_tab:
             st.markdown("""
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <h3 style="margin:0; font-size: 16px; color: #111827; font-family: sans-serif;">LangGraph Agent</h3>
+    <h3 style="margin:0; font-size: 20px; color: #111827; font-family: sans-serif;">LangGraph Agent</h3>
     <span style="color: #8B5CF6;">&#9881;</span>
     </div>
     """, unsafe_allow_html=True)
@@ -851,18 +871,18 @@ with tab3:
         text-align: center;
     }}
     .agent-step-title {{
-        font-size: 15px;
+        font-size: 19px;
         font-weight: 700;
         line-height: 1.2;
     }}
     .agent-step-description {{
         margin-top: 3px;
-        font-size: 10px;
+        font-size: 14px;
         line-height: 1.4;
     }}
     .agent-step-state {{
         margin-top: 4px;
-        font-size: 9px;
+        font-size: 13px;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: .04em;
@@ -968,8 +988,8 @@ with tab3:
                 st.success("Agent Workflow Complete! The recommended mitigation strategies have been finalized.")
 with tab4:
     st.markdown('''
-<h1 style="margin: 0; padding: 0; font-size: 28px; color: #111827; font-weight: 700; font-family: sans-serif; margin-bottom: 4px;">Dashboard & Deployment</h1>
-<p style="margin: 0 0 24px 0; color: #6B7280; font-size: 15px; font-family: sans-serif;">Risk analytics dashboard and comprehensive assessment reports</p>
+<h1 style="margin: 0; padding: 0; font-size: 32px; color: #111827; font-weight: 700; font-family: sans-serif; margin-bottom: 4px;">Dashboard & Deployment</h1>
+<p style="margin: 0 0 24px 0; color: #6B7280; font-size: 19px; font-family: sans-serif;">Risk analytics dashboard and comprehensive assessment reports</p>
 ''', unsafe_allow_html=True)
 
     if 'project_data' not in st.session_state:
@@ -989,35 +1009,35 @@ with tab4:
         col1, col2, col3 = st.columns([1, 1.5, 1])
 
         with col1:
-            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 14px; margin-bottom: 12px; font-family: sans-serif;">Risk Analytics</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 18px; margin-bottom: 12px; font-family: sans-serif;">Risk Analytics</div>', unsafe_allow_html=True)
             
             html_metrics = f"""
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; font-family: sans-serif;">
                 <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; text-align: center; background: white;">
-                    <div style="color: #6B7280; font-size: 11px; font-weight: 500; margin-bottom: 8px;">Overall Risk</div>
-                    <div style="color: #EF4444; font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{overall_risk}%</div>
-                    <div style="color: #10B981; font-size: 10px; font-weight: 600;">&uarr; +5%</div>
+                    <div style="color: #6B7280; font-size: 15px; font-weight: 500; margin-bottom: 8px;">Overall Risk</div>
+                    <div style="color: #EF4444; font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{overall_risk}%</div>
+                    <div style="color: #10B981; font-size: 14px; font-weight: 600;">&uarr; +5%</div>
                 </div>
                 <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; text-align: center; background: white;">
-                    <div style="color: #6B7280; font-size: 11px; font-weight: 500; margin-bottom: 8px;">Success Prob.</div>
-                    <div style="color: #F59E0B; font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{success_prob}%</div>
-                    <div style="color: #EF4444; font-size: 10px; font-weight: 600;">&darr; -8%</div>
+                    <div style="color: #6B7280; font-size: 15px; font-weight: 500; margin-bottom: 8px;">Success Prob.</div>
+                    <div style="color: #F59E0B; font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{success_prob}%</div>
+                    <div style="color: #EF4444; font-size: 14px; font-weight: 600;">&darr; -8%</div>
                 </div>
                 <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; text-align: center; background: white;">
-                    <div style="color: #6B7280; font-size: 11px; font-weight: 500; margin-bottom: 8px;">Market Risk</div>
-                    <div style="color: #EF4444; font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{market_risk}%</div>
-                    <div style="color: #10B981; font-size: 10px; font-weight: 600;">&uarr; +12%</div>
+                    <div style="color: #6B7280; font-size: 15px; font-weight: 500; margin-bottom: 8px;">Market Risk</div>
+                    <div style="color: #EF4444; font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{market_risk}%</div>
+                    <div style="color: #10B981; font-size: 14px; font-weight: 600;">&uarr; +12%</div>
                 </div>
                 <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; text-align: center; background: white;">
-                    <div style="color: #6B7280; font-size: 11px; font-weight: 500; margin-bottom: 8px;">Tech Risk</div>
-                    <div style="color: #F59E0B; font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{tech_risk}%</div>
-                    <div style="color: #EF4444; font-size: 10px; font-weight: 600;">&darr; -3%</div>
+                    <div style="color: #6B7280; font-size: 15px; font-weight: 500; margin-bottom: 8px;">Tech Risk</div>
+                    <div style="color: #F59E0B; font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{tech_risk}%</div>
+                    <div style="color: #EF4444; font-size: 14px; font-weight: 600;">&darr; -3%</div>
                 </div>
             </div>
             """
             st.markdown(html_metrics, unsafe_allow_html=True)
 
-            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 12px; margin-top: 12px; margin-bottom: 8px; font-family: sans-serif;">Risk Trend (6 Months)</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 16px; margin-top: 12px; margin-bottom: 8px; font-family: sans-serif;">Risk Trend (6 Months)</div>', unsafe_allow_html=True)
             
             # Create dummy chart data using random values around overall_risk
             import numpy as np
@@ -1031,7 +1051,7 @@ with tab4:
         with col2:
             header_col1, header_col2, header_col3 = st.columns([4, 2, 2])
             with header_col1:
-                st.markdown('<div style="font-weight: 600; color: #374151; font-size: 14px; margin-bottom: 12px; margin-top: 5px; font-family: sans-serif;">Assessment Report</div>', unsafe_allow_html=True)
+                st.markdown('<div style="font-weight: 600; color: #374151; font-size: 18px; margin-bottom: 12px; margin-top: 5px; font-family: sans-serif;">Assessment Report</div>', unsafe_allow_html=True)
             
             report_markdown = f"""# Prediction AI - Risk Assessment Report
 **Project:** {data.get('startup_name', 'Unknown')}
@@ -1066,10 +1086,10 @@ with tab4:
             st.markdown('''
             <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="font-weight: 600; font-size: 13px; color: #111827;">Key Findings</span>
-                    <span style="color: #D97706; background: #FEF3C7; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">High Priority</span>
+                    <span style="font-weight: 600; font-size: 17px; color: #111827;">Key Findings</span>
+                    <span style="color: #D97706; background: #FEF3C7; font-size: 14px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">High Priority</span>
                 </div>
-                <ul style="color: #6B7280; font-size: 12px; padding-left: 16px; margin-bottom: 0;">
+                <ul style="color: #6B7280; font-size: 16px; padding-left: 16px; margin-bottom: 0;">
                     <li>Market saturation: 15+ direct competitors in target segment</li>
                     <li>Budget runway: Only 8 months remaining at current burn rate</li>
                     <li>Team gaps: Missing critical marketing and sales expertise</li>
@@ -1079,10 +1099,10 @@ with tab4:
             
             <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="font-weight: 600; font-size: 13px; color: #111827;">Risk Assessment</span>
-                    <span style="color: #2563EB; background: #DBEAFE; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Medium Priority</span>
+                    <span style="font-weight: 600; font-size: 17px; color: #111827;">Risk Assessment</span>
+                    <span style="color: #2563EB; background: #DBEAFE; font-size: 14px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Medium Priority</span>
                 </div>
-                <p style="color: #6B7280; font-size: 12px; margin-bottom: 0;">
+                <p style="color: #6B7280; font-size: 16px; margin-bottom: 0;">
                     <b>Market Risk (85%):</b> High competition and customer acquisition costs<br>
                     <b>Financial Risk (72%):</b> Insufficient runway and revenue projections<br>
                     <b>Technical Risk (48%):</b> Feasible with current team capabilities
@@ -1091,10 +1111,10 @@ with tab4:
             
             <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; background: white; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="font-weight: 600; font-size: 13px; color: #111827;">Recommendations</span>
-                    <span style="color: #DC2626; background: #FEE2E2; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Action Required</span>
+                    <span style="font-weight: 600; font-size: 17px; color: #111827;">Recommendations</span>
+                    <span style="color: #DC2626; background: #FEE2E2; font-size: 14px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Action Required</span>
                 </div>
-                <ol style="color: #6B7280; font-size: 12px; padding-left: 16px; margin-bottom: 0;">
+                <ol style="color: #6B7280; font-size: 16px; padding-left: 16px; margin-bottom: 0;">
                     <li>Pivot to niche market to reduce competition</li>
                     <li>Secure Series A funding within 90 days</li>
                     <li>Hire marketing lead with industry experience</li>
@@ -1104,15 +1124,15 @@ with tab4:
             ''', unsafe_allow_html=True)
 
         with col3:
-            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 14px; margin-bottom: 12px; font-family: sans-serif;">Strategic Insights 💡</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 18px; margin-bottom: 12px; font-family: sans-serif;">Strategic Insights 💡</div>', unsafe_allow_html=True)
             
             st.markdown('''
             <div style="border-left: 3px solid #EF4444; padding-left: 12px; margin-bottom: 8px; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span style="font-weight: 600; font-size: 12px; color: #111827;">Funding Strategy</span>
-                    <span style="color: #EF4444; background: #FEE2E2; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Critical Impact</span>
+                    <span style="font-weight: 600; font-size: 16px; color: #111827;">Funding Strategy</span>
+                    <span style="color: #EF4444; background: #FEE2E2; font-size: 13px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Critical Impact</span>
                 </div>
-                <p style="color: #6B7280; font-size: 11px; margin-bottom: 0px; line-height: 1.4;">Current burn rate unsustainable. Need bridge round or pivot to revenue-generating model</p>
+                <p style="color: #6B7280; font-size: 15px; margin-bottom: 0px; line-height: 1.4;">Current burn rate unsustainable. Need bridge round or pivot to revenue-generating model</p>
             </div>
             ''', unsafe_allow_html=True)
             
@@ -1127,10 +1147,10 @@ with tab4:
             st.markdown('''
             <div style="border-left: 3px solid #F59E0B; padding-left: 12px; margin-bottom: 8px; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span style="font-weight: 600; font-size: 12px; color: #111827;">Technical Advantage</span>
-                    <span style="color: #F59E0B; background: #FEF3C7; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Medium Impact</span>
+                    <span style="font-weight: 600; font-size: 16px; color: #111827;">Technical Advantage</span>
+                    <span style="color: #F59E0B; background: #FEF3C7; font-size: 13px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Medium Impact</span>
                 </div>
-                <p style="color: #6B7280; font-size: 11px; margin-bottom: 0px; line-height: 1.4;">AI algorithm shows 25% better accuracy than competitors. Leverage for marketing differentiation</p>
+                <p style="color: #6B7280; font-size: 15px; margin-bottom: 0px; line-height: 1.4;">AI algorithm shows 25% better accuracy than competitors. Leverage for marketing differentiation</p>
             </div>
             ''', unsafe_allow_html=True)
             
@@ -1145,17 +1165,17 @@ with tab4:
             
             st.markdown('''
             
-            <div style="font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 12px; font-family: sans-serif;">Recommended Next Steps</div>
+            <div style="font-weight: 600; color: #374151; font-size: 17px; margin-bottom: 12px; font-family: sans-serif;">Recommended Next Steps</div>
             <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
-                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; margin-right: 8px;">1</div>
-                <span style="color: #4B5563; font-size: 11px;">Schedule pivot strategy meeting</span>
+                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">1</div>
+                <span style="color: #4B5563; font-size: 15px;">Schedule pivot strategy meeting</span>
             </div>
             <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
-                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; margin-right: 8px;">2</div>
-                <span style="color: #4B5563; font-size: 11px;">Prepare investor pitch deck</span>
+                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">2</div>
+                <span style="color: #4B5563; font-size: 15px;">Prepare investor pitch deck</span>
             </div>
             <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
-                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; margin-right: 8px;">3</div>
-                <span style="color: #4B5563; font-size: 11px;">Initiate partnership discussions</span>
+                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">3</div>
+                <span style="color: #4B5563; font-size: 15px;">Initiate partnership discussions</span>
             </div>
             ''', unsafe_allow_html=True)
