@@ -1090,7 +1090,10 @@ with tab4:
                     
                     s1, s2 = st.columns(2)
                     with s1:
-                        st.markdown(f'<a href="mailto:?subject={report_title}&body=Check out my project risk report: {report_url}" target="_blank" style="display: block; text-align: center; background: #EA4335; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📧 Gmail</a>', unsafe_allow_html=True)
+                        import urllib.parse
+                        subject = urllib.parse.quote(report_title)
+                        body = urllib.parse.quote(f"Check out my project risk report: {report_url}")
+                        st.markdown(f'<a href="mailto:?subject={subject}&body={body}" style="display: block; text-align: center; background: #EA4335; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📧 Email</a>', unsafe_allow_html=True)
                         st.markdown(f'<a href="https://wa.me/?text=Check%20out%20my%20project%20risk%20report:%20{report_url}" target="_blank" style="display: block; text-align: center; background: #25D366; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">💬 WhatsApp</a>', unsafe_allow_html=True)
                     with s2:
                         st.markdown(f'<a href="sms:?body=Check out my project risk report: {report_url}" target="_blank" style="display: block; text-align: center; background: #3B82F6; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📱 Messages</a>', unsafe_allow_html=True)
