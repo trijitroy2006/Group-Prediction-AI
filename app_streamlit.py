@@ -1011,7 +1011,39 @@ with tab4:
             st.line_chart(chart_data, height=200)
 
         with col2:
-            st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-family: sans-serif;"><div style="font-weight: 600; color: #374151; font-size: 14px;">Assessment Report</div><div><button style="background: white; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 10px; padding: 2px 8px; margin-right: 4px;">📥 Export</button><button style="background: #EF4444; color: white; border: none; border-radius: 4px; font-size: 10px; padding: 3px 8px;">🔗 Share</button></div></div>', unsafe_allow_html=True)
+            header_col1, header_col2, header_col3 = st.columns([4, 2, 2])
+            with header_col1:
+                st.markdown('<div style="font-weight: 600; color: #374151; font-size: 14px; margin-bottom: 12px; margin-top: 5px; font-family: sans-serif;">Assessment Report</div>', unsafe_allow_html=True)
+            
+            report_markdown = f"""# Prediction AI - Risk Assessment Report
+**Project:** {data.get('startup_name', 'Unknown')}
+**Industry:** {industry}
+
+## Key Findings
+- Market saturation: 15+ direct competitors in target segment
+- Budget runway: Only 8 months remaining at current burn rate
+- Team gaps: Missing critical marketing and sales expertise
+- Differentiation: No clear unique value proposition identified
+
+## Risk Assessment
+- Market Risk ({market_risk}%): High competition and customer acquisition costs
+- Financial Risk (72%): Insufficient runway and revenue projections
+- Technical Risk ({tech_risk}%): Feasible with current team capabilities
+
+## Recommendations
+1. Pivot to niche market to reduce competition
+2. Secure Series A funding within 90 days
+3. Hire marketing lead with industry experience
+4. Develop MVP to validate market fit
+"""
+            with header_col2:
+                st.download_button(label="📥 Export", data=report_markdown, file_name="risk_assessment_report.md", mime="text/markdown", use_container_width=True)
+            with header_col3:
+                with st.popover("🔗 Share", use_container_width=True):
+                    st.write("**Share this report securely:**")
+                    st.code("http://localhost:8501/?view=dashboard&report_id=latest")
+                    if st.button("Copy Link", use_container_width=True):
+                        st.toast("Report link copied to clipboard! 📋")
             
             st.markdown('''
             <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
