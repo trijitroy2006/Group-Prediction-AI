@@ -967,6 +967,125 @@ with tab3:
 
                 st.success("Agent Workflow Complete! The recommended mitigation strategies have been finalized.")
 with tab4:
-    st.info("Dashboard coming soon")
+    st.markdown('''
+<h1 style="margin: 0; padding: 0; font-size: 28px; color: #111827; font-weight: 700; font-family: sans-serif; margin-bottom: 4px;">Dashboard & Deployment</h1>
+<p style="margin: 0 0 24px 0; color: #6B7280; font-size: 15px; font-family: sans-serif;">Risk analytics dashboard and comprehensive assessment reports</p>
+''', unsafe_allow_html=True)
 
+    if 'project_data' not in st.session_state:
+        st.info('Submit a project idea in the Project Input tab to view the Dashboard.')
+    else:
+        # Mock dynamic data based on session state
+        data = st.session_state.get('project_data', {})
+        industry = data.get('industry', 'Technology')
+        budget = data.get('budget', 100000)
 
+        # Derive some numbers to make the dashboard look dynamic
+        overall_risk = min(85, max(15, int(100 - (budget / 5000))))
+        success_prob = 100 - overall_risk
+        market_risk = 65 if industry == 'Technology' else 40
+        tech_risk = 70 if industry == 'Technology' else 30
+
+        col1, col2, col3 = st.columns([1, 1.5, 1])
+
+        with col1:
+            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 14px; margin-bottom: 12px; font-family: sans-serif;">Risk Analytics</div>', unsafe_allow_html=True)
+            
+            c1, c2 = st.columns(2)
+            c1.metric("Overall Risk", f"{overall_risk}%", "+5%", delta_color="inverse")
+            c2.metric("Success Prob.", f"{success_prob}%", "-8%", delta_color="normal")
+            
+            c3, c4 = st.columns(2)
+            c3.metric("Market Risk", f"{market_risk}%", "+12%", delta_color="inverse")
+            c4.metric("Tech Risk", f"{tech_risk}%", "-3%", delta_color="normal")
+
+            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 12px; margin-top: 24px; margin-bottom: 8px; font-family: sans-serif;">Risk Trend (6 Months)</div>', unsafe_allow_html=True)
+            
+            # Create dummy chart data using random values around overall_risk
+            import numpy as np
+            chart_data = pd.DataFrame(
+                np.random.randn(6, 1) * 10 + overall_risk,
+                index=["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
+                columns=["Risk Level"]
+            )
+            st.line_chart(chart_data, height=200)
+
+        with col2:
+            st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-family: sans-serif;"><div style="font-weight: 600; color: #374151; font-size: 14px;">Assessment Report</div><div><button style="background: white; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 10px; padding: 2px 8px; margin-right: 4px;">📥 Export</button><button style="background: #EF4444; color: white; border: none; border-radius: 4px; font-size: 10px; padding: 3px 8px;">🔗 Share</button></div></div>', unsafe_allow_html=True)
+            
+            st.markdown('''
+            <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-weight: 600; font-size: 13px; color: #111827;">Key Findings</span>
+                    <span style="color: #D97706; background: #FEF3C7; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">High Priority</span>
+                </div>
+                <ul style="color: #6B7280; font-size: 12px; padding-left: 16px; margin-bottom: 0;">
+                    <li>Market saturation: 15+ direct competitors in target segment</li>
+                    <li>Budget runway: Only 8 months remaining at current burn rate</li>
+                    <li>Team gaps: Missing critical marketing and sales expertise</li>
+                    <li>Differentiation: No clear unique value proposition identified</li>
+                </ul>
+            </div>
+            
+            <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-weight: 600; font-size: 13px; color: #111827;">Risk Assessment</span>
+                    <span style="color: #2563EB; background: #DBEAFE; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Medium Priority</span>
+                </div>
+                <p style="color: #6B7280; font-size: 12px; margin-bottom: 0;">
+                    <b>Market Risk (85%):</b> High competition and customer acquisition costs<br>
+                    <b>Financial Risk (72%):</b> Insufficient runway and revenue projections<br>
+                    <b>Technical Risk (48%):</b> Feasible with current team capabilities
+                </p>
+            </div>
+            
+            <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; background: white; font-family: sans-serif;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-weight: 600; font-size: 13px; color: #111827;">Recommendations</span>
+                    <span style="color: #DC2626; background: #FEE2E2; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Action Required</span>
+                </div>
+                <ol style="color: #6B7280; font-size: 12px; padding-left: 16px; margin-bottom: 0;">
+                    <li>Pivot to niche market to reduce competition</li>
+                    <li>Secure Series A funding within 90 days</li>
+                    <li>Hire marketing lead with industry experience</li>
+                    <li>Develop MVP to validate market fit</li>
+                </ol>
+            </div>
+            ''', unsafe_allow_html=True)
+
+        with col3:
+            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 14px; margin-bottom: 12px; font-family: sans-serif;">Strategic Insights 💡</div>', unsafe_allow_html=True)
+            
+            st.markdown('''
+            <div style="border-left: 3px solid #EF4444; padding-left: 12px; margin-bottom: 20px; font-family: sans-serif;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="font-weight: 600; font-size: 12px; color: #111827;">Funding Strategy</span>
+                    <span style="color: #EF4444; background: #FEE2E2; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Critical Impact</span>
+                </div>
+                <p style="color: #6B7280; font-size: 11px; margin-bottom: 4px; line-height: 1.4;">Current burn rate unsustainable. Need bridge round or pivot to revenue-generating model</p>
+                <a href="#" style="color: #3B82F6; font-size: 10px; text-decoration: none;">See funding options &rarr;</a>
+            </div>
+            
+            <div style="border-left: 3px solid #F59E0B; padding-left: 12px; margin-bottom: 24px; font-family: sans-serif;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="font-weight: 600; font-size: 12px; color: #111827;">Technical Advantage</span>
+                    <span style="color: #F59E0B; background: #FEF3C7; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Medium Impact</span>
+                </div>
+                <p style="color: #6B7280; font-size: 11px; margin-bottom: 4px; line-height: 1.4;">AI algorithm shows 25% better accuracy than competitors. Leverage for marketing differentiation</p>
+                <a href="#" style="color: #3B82F6; font-size: 10px; text-decoration: none;">View comparison &rarr;</a>
+            </div>
+            
+            <div style="font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 12px; font-family: sans-serif;">Recommended Next Steps</div>
+            <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
+                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; margin-right: 8px;">1</div>
+                <span style="color: #4B5563; font-size: 11px;">Schedule pivot strategy meeting</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
+                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; margin-right: 8px;">2</div>
+                <span style="color: #4B5563; font-size: 11px;">Prepare investor pitch deck</span>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
+                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; margin-right: 8px;">3</div>
+                <span style="color: #4B5563; font-size: 11px;">Initiate partnership discussions</span>
+            </div>
+            ''', unsafe_allow_html=True)
