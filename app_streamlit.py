@@ -991,15 +991,33 @@ with tab4:
         with col1:
             st.markdown('<div style="font-weight: 600; color: #374151; font-size: 14px; margin-bottom: 12px; font-family: sans-serif;">Risk Analytics</div>', unsafe_allow_html=True)
             
-            c1, c2 = st.columns(2)
-            c1.metric("Overall Risk", f"{overall_risk}%", "+5%", delta_color="inverse")
-            c2.metric("Success Prob.", f"{success_prob}%", "-8%", delta_color="normal")
-            
-            c3, c4 = st.columns(2)
-            c3.metric("Market Risk", f"{market_risk}%", "+12%", delta_color="inverse")
-            c4.metric("Tech Risk", f"{tech_risk}%", "-3%", delta_color="normal")
+            html_metrics = f"""
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; font-family: sans-serif;">
+                <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; text-align: center; background: white;">
+                    <div style="color: #6B7280; font-size: 11px; font-weight: 500; margin-bottom: 8px;">Overall Risk</div>
+                    <div style="color: #EF4444; font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{overall_risk}%</div>
+                    <div style="color: #10B981; font-size: 10px; font-weight: 600;">&uarr; +5%</div>
+                </div>
+                <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; text-align: center; background: white;">
+                    <div style="color: #6B7280; font-size: 11px; font-weight: 500; margin-bottom: 8px;">Success Prob.</div>
+                    <div style="color: #F59E0B; font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{success_prob}%</div>
+                    <div style="color: #EF4444; font-size: 10px; font-weight: 600;">&darr; -8%</div>
+                </div>
+                <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; text-align: center; background: white;">
+                    <div style="color: #6B7280; font-size: 11px; font-weight: 500; margin-bottom: 8px;">Market Risk</div>
+                    <div style="color: #EF4444; font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{market_risk}%</div>
+                    <div style="color: #10B981; font-size: 10px; font-weight: 600;">&uarr; +12%</div>
+                </div>
+                <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; text-align: center; background: white;">
+                    <div style="color: #6B7280; font-size: 11px; font-weight: 500; margin-bottom: 8px;">Tech Risk</div>
+                    <div style="color: #F59E0B; font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 8px;">{tech_risk}%</div>
+                    <div style="color: #EF4444; font-size: 10px; font-weight: 600;">&darr; -3%</div>
+                </div>
+            </div>
+            """
+            st.markdown(html_metrics, unsafe_allow_html=True)
 
-            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 12px; margin-top: 24px; margin-bottom: 8px; font-family: sans-serif;">Risk Trend (6 Months)</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 12px; margin-top: 12px; margin-bottom: 8px; font-family: sans-serif;">Risk Trend (6 Months)</div>', unsafe_allow_html=True)
             
             # Create dummy chart data using random values around overall_risk
             import numpy as np
@@ -1008,7 +1026,7 @@ with tab4:
                 index=["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
                 columns=["Risk Level"]
             )
-            st.line_chart(chart_data, height=200)
+            st.area_chart(chart_data, height=200)
 
         with col2:
             header_col1, header_col2, header_col3 = st.columns([4, 2, 2])
