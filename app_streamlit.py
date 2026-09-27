@@ -1089,23 +1089,43 @@ with tab4:
             st.markdown('<div style="font-weight: 600; color: #374151; font-size: 14px; margin-bottom: 12px; font-family: sans-serif;">Strategic Insights 💡</div>', unsafe_allow_html=True)
             
             st.markdown('''
-            <div style="border-left: 3px solid #EF4444; padding-left: 12px; margin-bottom: 20px; font-family: sans-serif;">
+            <div style="border-left: 3px solid #EF4444; padding-left: 12px; margin-bottom: 8px; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                     <span style="font-weight: 600; font-size: 12px; color: #111827;">Funding Strategy</span>
                     <span style="color: #EF4444; background: #FEE2E2; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Critical Impact</span>
                 </div>
-                <p style="color: #6B7280; font-size: 11px; margin-bottom: 4px; line-height: 1.4;">Current burn rate unsustainable. Need bridge round or pivot to revenue-generating model</p>
-                <a href="#" style="color: #3B82F6; font-size: 10px; text-decoration: none;">See funding options &rarr;</a>
+                <p style="color: #6B7280; font-size: 11px; margin-bottom: 0px; line-height: 1.4;">Current burn rate unsustainable. Need bridge round or pivot to revenue-generating model</p>
             </div>
+            ''', unsafe_allow_html=True)
             
-            <div style="border-left: 3px solid #F59E0B; padding-left: 12px; margin-bottom: 24px; font-family: sans-serif;">
+            with st.popover("See funding options ↗", use_container_width=True):
+                st.markdown("**Recommended Funding Options**")
+                st.info("💸 **Bridge Round:** Seek $500k convertible note from existing investors.")
+                st.success("🤝 **Strategic Partnership:** Co-develop with enterprise client to offset R&D costs.")
+                st.warning("🔄 **Pivot:** Shift to a high-margin B2B SaaS model to achieve faster profitability.")
+                
+            st.markdown('<div style="margin-bottom: 16px;"></div>', unsafe_allow_html=True)
+            
+            st.markdown('''
+            <div style="border-left: 3px solid #F59E0B; padding-left: 12px; margin-bottom: 8px; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                     <span style="font-weight: 600; font-size: 12px; color: #111827;">Technical Advantage</span>
                     <span style="color: #F59E0B; background: #FEF3C7; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Medium Impact</span>
                 </div>
-                <p style="color: #6B7280; font-size: 11px; margin-bottom: 4px; line-height: 1.4;">AI algorithm shows 25% better accuracy than competitors. Leverage for marketing differentiation</p>
-                <a href="#" style="color: #3B82F6; font-size: 10px; text-decoration: none;">View comparison &rarr;</a>
+                <p style="color: #6B7280; font-size: 11px; margin-bottom: 0px; line-height: 1.4;">AI algorithm shows 25% better accuracy than competitors. Leverage for marketing differentiation</p>
             </div>
+            ''', unsafe_allow_html=True)
+            
+            with st.popover("View comparison 📊", use_container_width=True):
+                st.markdown("**Technical Performance vs Competitors**")
+                comparison_data = pd.DataFrame({
+                    "Accuracy (%)": [92, 75, 68, 54]
+                }, index=["Your AI", "Competitor A", "Competitor B", "Industry Avg"])
+                st.bar_chart(comparison_data)
+                
+            st.markdown('<div style="margin-bottom: 16px;"></div>', unsafe_allow_html=True)
+            
+            st.markdown('''
             
             <div style="font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 12px; font-family: sans-serif;">Recommended Next Steps</div>
             <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
