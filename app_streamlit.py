@@ -1079,9 +1079,22 @@ with tab4:
             with header_col3:
                 with st.popover("🔗 Share", use_container_width=True):
                     st.write("**Share this report securely:**")
-                    st.code("http://localhost:8501/?view=dashboard&report_id=latest")
+                    report_url = "http://localhost:8501/?view=dashboard&report_id=latest"
+                    report_title = "Prediction AI - Risk Assessment Report"
+                    st.code(report_url)
                     if st.button("Copy Link", use_container_width=True):
                         st.toast("Report link copied to clipboard! 📋")
+                    
+                    st.divider()
+                    st.markdown('<div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Share via:</div>', unsafe_allow_html=True)
+                    
+                    s1, s2 = st.columns(2)
+                    with s1:
+                        st.markdown(f'<a href="mailto:?subject={report_title}&body=Check out my project risk report: {report_url}" target="_blank" style="display: block; text-align: center; background: #EA4335; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📧 Gmail</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="https://wa.me/?text=Check%20out%20my%20project%20risk%20report:%20{report_url}" target="_blank" style="display: block; text-align: center; background: #25D366; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">💬 WhatsApp</a>', unsafe_allow_html=True)
+                    with s2:
+                        st.markdown(f'<a href="sms:?body=Check out my project risk report: {report_url}" target="_blank" style="display: block; text-align: center; background: #3B82F6; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📱 Messages</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="https://www.linkedin.com/sharing/share-offsite/?url=http://localhost:8501" target="_blank" style="display: block; text-align: center; background: #0A66C2; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">💼 LinkedIn</a>', unsafe_allow_html=True)
             
             st.markdown('''
             <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
