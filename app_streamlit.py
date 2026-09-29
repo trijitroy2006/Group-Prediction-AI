@@ -1230,7 +1230,7 @@ with tab4:
                 
             st.markdown('<div style="margin-bottom: 16px;"></div>', unsafe_allow_html=True)
             
-            st.markdown('''
+            st.markdown(f'''
             
             <div style="font-weight: 600; color: #374151; font-size: 17px; margin-bottom: 12px; font-family: sans-serif;">Recommended Next Steps</div>
             <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
