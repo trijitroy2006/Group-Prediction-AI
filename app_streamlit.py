@@ -111,15 +111,21 @@ with tab1:
                 "business_model": business_model,
                 "target_market": target_market,
                 "budget": budget,
-                "project_description": description,
+                "project_description": description
             }
+
+            #this will store the submitted projeect immediately
+            st.session_state["project_data"] = project_data
+            st.session_state["assessment_saved"] = False
+
+            #now to save it to postgresql
             try:
                 project_id = database.insert_project(project_data)
-                st.session_state['project_id'] = project_id
-                st.session_state['project_data'] = project_data
-                st.session_state['assessment_saved'] = False
+                st.session_state["project_id"] = project_id
+                st.success("Project analyzed successfully.")
             except Exception as error:
-                print(f"Could not save the project to the database: {error}")
+                st.warning("Project analysis is available, but the database could not be updated.")
+                st.error(f"Database error: {error}")
 
     with col2:
         st.subheader("Market Analysis")
@@ -178,17 +184,32 @@ with tab2:
     else:
         data = {'industry': 'Technology', 'budget': 100000, 'startup_name': 'Demo Project'}
         
-    # Algorithmically derive inputs from project_data
-    market_competition = "High" if data.get('industry') == 'Technology' else "Medium"
-    team_expertise = "Low" if data.get('budget', 0) < 50000 else "High"
-    resource_availability = "Good" if data.get('budget', 0) >= 100000 else "Limited"
-    innovation_level = "High"
-    market_research = "Moderate"
+    st.subheader("Risk Assessment Inputs")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        market_competition = st.selectbox("Market Competition", ["Low", "Medium", "High"])
+        team_expertise = st.selectbox("Team Expertise", ["Low", "Medium", "High"])
+        resource_availability = st.selectbox("Resource Availability", ["Limited", "Moderate", "Good"])
+
+    with col2:
+        innovation_level = st.selectbox("Innovation Level", ["Low", "Medium", "High"])
+        market_research = st.selectbox("Market Research Quality", ["Limited", "Moderate", "Strong"])
+
+    st.subheader("Project Feasibility Inputs")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        market_opportunity = st.slider("Market Opportunity Score", 0, 100, 50)
+        team_capability = st.slider("Team Capability Score", 0, 100, 50)
+
+    with col2:
+        competitive_advantage = st.slider("Competitive Advantage Score", 0, 100, 50)
+        resource_score = st.slider("Resource Availability Score", 0, 100, 50)
+
     
-    market_opportunity = 45 if market_competition == "High" else 75
-    team_capability = 50 if team_expertise == "Low" else 85
-    competitive_advantage = 35 if innovation_level == "Low" else 70
-    resource_score = 65 if resource_availability == "Good" else 30
 
     from risk_engine import calculate_risk, get_risk_status, calculate_success_probability
     from mitigation_engine import generate_mitigation
