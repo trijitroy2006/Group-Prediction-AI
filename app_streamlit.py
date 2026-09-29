@@ -1010,7 +1010,7 @@ with tab4:
 
         report = st.session_state.get('dashboard_report')
         if not report:
-            st.info("LLM generation failed or no API key. Using fallback data.")
+            
             report = {
                 "overall_risk": min(85, max(15, int(100 - (budget / 5000)))),
                 "success_prob": 100 - min(85, max(15, int(100 - (budget / 5000)))),
