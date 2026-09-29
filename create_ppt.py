@@ -9,7 +9,7 @@ def create_presentation():
     slide = prs.slides.add_slide(slide_layout)
     title = slide.shapes.title
     subtitle = slide.placeholders[1]
-    title.text = "Failure Prediction AI"
+    title.text = "Prediction AI"
     subtitle.text = "Startup & Project Risk Analyzer\nMilestone 1 Update"
 
     # Slide 2: Project Overview

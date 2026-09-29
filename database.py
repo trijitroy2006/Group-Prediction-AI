@@ -1,20 +1,15 @@
-import psycopg2
+import sqlite3
 import os
 from dotenv import load_dotenv
-from psycopg2.extras import RealDictCursor
+
 
 load_dotenv()
 
-DB_CONFIG = {
-    "dbname": os.getenv("POSTGRES_DB", "ml_project"),
-    "user": os.getenv("POSTGRES_USER", "postgres"),
-    "password": os.getenv("POSTGRES_PASSWORD"),
-    "host": os.getenv("POSTGRES_HOST", "localhost"),
-    "port": os.getenv("POSTGRES_PORT", "5432")
-}
+
 
 def get_db_connection():
-    conn = psycopg2.connect(**DB_CONFIG)
+    conn = sqlite3.connect('ml_project.db')
+    conn.row_factory = sqlite3.Row
     return conn
 
 def insert_project(data):
@@ -22,8 +17,8 @@ def insert_project(data):
     cur = conn.cursor()
     cur.execute('''
         INSERT INTO projects (startup_name, industry, business_model, target_market, budget, project_description)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        RETURNING id;
+        VALUES (?, ?, ?, ?, ?, ?)
+        
     ''', (
         data['startup_name'],
         data['industry'],
@@ -32,7 +27,7 @@ def insert_project(data):
         data['budget'],
         data['project_description']
     ))
-    project_id = cur.fetchone()[0]
+    project_id = cur.lastrowid
     conn.commit()
     cur.close()
     conn.close()
@@ -40,8 +35,8 @@ def insert_project(data):
 
 def get_project(project_id):
     conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute('SELECT * FROM projects WHERE id = %s;', (project_id,))
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM projects WHERE id = ?;', (project_id,))
     project = cur.fetchone()
     cur.close()
     conn.close()
@@ -64,7 +59,7 @@ def insert_swot_analysis(project_id, swot_data):
 
     cur.execute('''
         INSERT INTO swot_analysis (project_id, strengths, weaknesses, opportunities, threats)
-        VALUES (%s, %s, %s, %s, %s)
+        VALUES (?, ?, ?, ?, ?)
         RETURNING swot_id;
     ''', (project_id, strengths, weaknesses, opportunities, threats))
 
@@ -78,7 +73,7 @@ def insert_risk_assessment(project_id, risk_category, risk_score, risk_descripti
     cur = conn.cursor()
     cur.execute('''
         INSERT INTO risk_assessments (project_id, risk_category, risk_score, risk_description, priority_level)
-        VALUES (%s, %s, %s, %s, %s)
+        VALUES (?, ?, ?, ?, ?)
         RETURNING risk_id;
     ''', (project_id, risk_category, risk_score, risk_description, priority_level))
     risk_id = cur.fetchone()[0]
@@ -92,7 +87,7 @@ def insert_success_prediction(project_id, success_probability, overall_risk_scor
     cur = conn.cursor()
     cur.execute('''
         INSERT INTO success_predictions (project_id, success_probability, overall_risk_score)
-        VALUES (%s, %s, %s)
+        VALUES (?, ?, ?)
         RETURNING prediction_id;
     ''', (project_id, success_probability, overall_risk_score))
     
@@ -114,12 +109,12 @@ def save_assessment(project_id, swot_data, risk_score, risk_status, success_prob
 
         cur.execute('''
             INSERT INTO swot_analysis (project_id, strengths, weaknesses, opportunities, threats)
-            VALUES (%s, %s, %s, %s, %s);
+            VALUES (?, ?, ?, ?, ?);
         ''', (project_id, strengths, weaknesses, opportunities, threats))
 
         cur.execute('''
             INSERT INTO risk_assessments (project_id, risk_category, risk_score, risk_description, priority_level)
-            VALUES (%s, %s, %s, %s, %s);
+            VALUES (?, ?, ?, ?, ?);
         ''', (
             project_id,
             "Overall",
@@ -130,7 +125,7 @@ def save_assessment(project_id, swot_data, risk_score, risk_status, success_prob
 
         cur.execute('''
             INSERT INTO success_predictions (project_id, success_probability, overall_risk_score)
-            VALUES (%s, %s, %s);
+            VALUES (?, ?, ?);
         ''', (project_id, success_probability, risk_score))
 
         for recommendation in recommendations:
@@ -140,7 +135,7 @@ def save_assessment(project_id, swot_data, risk_score, risk_status, success_prob
             )
             cur.execute('''
                 INSERT INTO recommendations (project_id, recommendation_text, risk_mitigation, priority)
-                VALUES (%s, %s, %s, %s);
+                VALUES (?, ?, ?, ?);
             ''', (
                 project_id,
                 recommendation_text,
@@ -150,7 +145,7 @@ def save_assessment(project_id, swot_data, risk_score, risk_status, success_prob
 
         cur.execute('''
             INSERT INTO assessment_reports (project_id, report_path)
-            VALUES (%s, %s);
+            VALUES (?, ?);
         ''', (project_id, f"streamlit_assessment_{project_id}"))
 
         conn.commit()

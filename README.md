@@ -1,4 +1,4 @@
-# Failure Prediction AI
+# Prediction AI
 
 An intelligent decision-support platform to predict startup and project failure risks and recommend mitigations.
 
