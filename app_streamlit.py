@@ -1150,18 +1150,18 @@ with tab4:
                         st.markdown(f'<a href="sms:?body=Check out my project risk report: {report_url}" target="_blank" style="display: block; text-align: center; background: #3B82F6; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📱 Messages</a>', unsafe_allow_html=True)
                         st.markdown(f'<a href="https://www.linkedin.com/sharing/share-offsite/?url=http://localhost:8501" target="_blank" style="display: block; text-align: center; background: #0A66C2; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">💼 LinkedIn</a>', unsafe_allow_html=True)
             
-            st.markdown('''
+            st.markdown(f'''
             <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                     <span style="font-weight: 600; font-size: 17px; color: #111827;">Key Findings</span>
                     <span style="color: #D97706; background: #FEF3C7; font-size: 14px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">High Priority</span>
                 </div>
                 <ul style="color: #6B7280; font-size: 16px; padding-left: 16px; margin-bottom: 0;">
-                    <li>Market saturation: 15+ direct competitors in target segment</li>
-                    <li>Budget runway: Only 8 months remaining at current burn rate</li>
-                    <li>Team gaps: Missing critical marketing and sales expertise</li>
-                    <li>Differentiation: No clear unique value proposition identified</li>
-                </ul>
+                <li style="font-size: 16px;"><b>{safe_get(kf, 0, 'title')}</b>: {safe_get(kf, 0, 'desc')}</li>
+                <li style="font-size: 16px;"><b>{safe_get(kf, 1, 'title')}</b>: {safe_get(kf, 1, 'desc')}</li>
+                <li style="font-size: 16px;"><b>{safe_get(kf, 2, 'title')}</b>: {safe_get(kf, 2, 'desc')}</li>
+                <li style="font-size: 16px;"><b>{safe_get(kf, 3, 'title')}</b>: {safe_get(kf, 3, 'desc')}</li>
+            </ul>
             </div>
             
             <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
@@ -1182,18 +1182,18 @@ with tab4:
                     <span style="color: #DC2626; background: #FEE2E2; font-size: 14px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Action Required</span>
                 </div>
                 <ol style="color: #6B7280; font-size: 16px; padding-left: 16px; margin-bottom: 0;">
-                    <li>Pivot to niche market to reduce competition</li>
-                    <li>Secure Series A funding within 90 days</li>
-                    <li>Hire marketing lead with industry experience</li>
-                    <li>Develop MVP to validate market fit</li>
-                </ol>
+                <li style="font-size: 16px;">{safe_get(recs, 0)}</li>
+                <li style="font-size: 16px;">{safe_get(recs, 1)}</li>
+                <li style="font-size: 16px;">{safe_get(recs, 2)}</li>
+                <li style="font-size: 16px;">{safe_get(recs, 3)}</li>
+            </ol>
             </div>
             ''', unsafe_allow_html=True)
 
         with col3:
             st.markdown('<div style="font-weight: 600; color: #374151; font-size: 18px; margin-bottom: 12px; font-family: sans-serif;">Strategic Insights 💡</div>', unsafe_allow_html=True)
             
-            st.markdown('''
+            st.markdown(f'''
             <div style="border-left: 3px solid #EF4444; padding-left: 12px; margin-bottom: 8px; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                     <span style="font-weight: 600; font-size: 16px; color: #111827;">Funding Strategy</span>
@@ -1211,7 +1211,7 @@ with tab4:
                 
             st.markdown('<div style="margin-bottom: 16px;"></div>', unsafe_allow_html=True)
             
-            st.markdown('''
+            st.markdown(f'''
             <div style="border-left: 3px solid #F59E0B; padding-left: 12px; margin-bottom: 8px; font-family: sans-serif;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                     <span style="font-weight: 600; font-size: 16px; color: #111827;">Technical Advantage</span>
