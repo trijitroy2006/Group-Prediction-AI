@@ -68,7 +68,9 @@ def generate_llm_recommendations(project_data, risk_data, swot_data, feasibility
 
     except Exception as e:
         print("LLM recommendation generation failed:", e)
-        return Noneimport os
+        return None
+
+import os
 import json
 import re
 from dotenv import load_dotenv
