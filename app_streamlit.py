@@ -995,16 +995,67 @@ with tab4:
     if 'project_data' not in st.session_state:
         st.info('Submit a project idea in the Project Input tab to view the Dashboard.')
     else:
-        # Mock dynamic data based on session state
         data = st.session_state.get('project_data', {})
         industry = data.get('industry', 'Technology')
         budget = data.get('budget', 100000)
+        
+        if 'dashboard_report' not in st.session_state:
+            with st.spinner("Generating AI Dashboard Report with Gemini..."):
+                try:
+                    from llm_service import generate_dashboard_report
+                    st.session_state['dashboard_report'] = generate_dashboard_report(data)
+                except Exception as e:
+                    st.error(f"Failed to load AI Engine: {e}")
+                    st.session_state['dashboard_report'] = None
 
-        # Derive some numbers to make the dashboard look dynamic
-        overall_risk = min(85, max(15, int(100 - (budget / 5000))))
-        success_prob = 100 - overall_risk
-        market_risk = 65 if industry == 'Technology' else 40
-        tech_risk = 70 if industry == 'Technology' else 30
+        report = st.session_state.get('dashboard_report')
+        if not report:
+            st.info("LLM generation failed or no API key. Using fallback data.")
+            report = {
+                "overall_risk": min(85, max(15, int(100 - (budget / 5000)))),
+                "success_prob": 100 - min(85, max(15, int(100 - (budget / 5000)))),
+                "market_risk": 65 if industry == 'Technology' else 40,
+                "tech_risk": 70 if industry == 'Technology' else 30,
+                "key_findings": [
+                    {"title": "Market Saturation", "desc": "15+ direct competitors in target segment"},
+                    {"title": "Budget Runway", "desc": "Only 8 months remaining at current burn rate"},
+                    {"title": "Team Gaps", "desc": "Missing critical marketing and sales expertise"},
+                    {"title": "Differentiation", "desc": "No clear unique value proposition identified"}
+                ],
+                "risk_assessment": [
+                    {"title": "Market Risk", "desc": "High competition and customer acquisition costs"},
+                    {"title": "Financial Risk", "desc": "Insufficient runway and revenue projections"},
+                    {"title": "Technical Risk", "desc": "Feasible with current team capabilities"}
+                ],
+                "recommendations": [
+                    "Pivot to niche market to reduce competition",
+                    "Secure Series A funding within 90 days",
+                    "Hire marketing lead with industry experience",
+                    "Develop MVP to validate market fit"
+                ],
+                "funding_strategy": "Current burn rate unsustainable. Need bridge round or pivot to revenue-generating model",
+                "tech_advantage": "AI algorithm shows 25% better accuracy than competitors. Leverage for marketing differentiation",
+                "next_steps": [
+                    "Schedule pivot strategy meeting",
+                    "Prepare investor pitch deck",
+                    "Initiate partnership discussions"
+                ]
+            }
+
+        overall_risk = report.get('overall_risk', 50)
+        success_prob = report.get('success_prob', 50)
+        market_risk = report.get('market_risk', 50)
+        tech_risk = report.get('tech_risk', 50)
+        
+        kf = report.get('key_findings', [])
+        ra = report.get('risk_assessment', [])
+        recs = report.get('recommendations', [])
+        
+        def safe_get(lst, idx, key=None):
+            if idx < len(lst):
+                return lst[idx].get(key, '') if key else lst[idx]
+            return "N/A"
+
 
         col1, col2, col3 = st.columns([1, 1.5, 1])
 
@@ -1119,9 +1170,9 @@ with tab4:
                     <span style="color: #2563EB; background: #DBEAFE; font-size: 14px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Medium Priority</span>
                 </div>
                 <p style="color: #6B7280; font-size: 16px; margin-bottom: 0;">
-                    <b>Market Risk (85%):</b> High competition and customer acquisition costs<br>
-                    <b>Financial Risk (72%):</b> Insufficient runway and revenue projections<br>
-                    <b>Technical Risk (48%):</b> Feasible with current team capabilities
+                    <b>{safe_get(ra, 0, 'title')}:</b> {safe_get(ra, 0, 'desc')}<br>
+                    <b>{safe_get(ra, 1, 'title')}:</b> {safe_get(ra, 1, 'desc')}<br>
+                    <b>{safe_get(ra, 2, 'title')}:</b> {safe_get(ra, 2, 'desc')}
                 </p>
             </div>
             
@@ -1148,7 +1199,7 @@ with tab4:
                     <span style="font-weight: 600; font-size: 16px; color: #111827;">Funding Strategy</span>
                     <span style="color: #EF4444; background: #FEE2E2; font-size: 13px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Critical Impact</span>
                 </div>
-                <p style="color: #6B7280; font-size: 15px; margin-bottom: 0px; line-height: 1.4;">Current burn rate unsustainable. Need bridge round or pivot to revenue-generating model</p>
+                <p style="color: #6B7280; font-size: 15px; margin-bottom: 0px; line-height: 1.4;">{report.get("funding_strategy", "N/A")}</p>
             </div>
             ''', unsafe_allow_html=True)
             
@@ -1166,7 +1217,7 @@ with tab4:
                     <span style="font-weight: 600; font-size: 16px; color: #111827;">Technical Advantage</span>
                     <span style="color: #F59E0B; background: #FEF3C7; font-size: 13px; font-weight: 600; padding: 2px 6px; border-radius: 4px;">Medium Impact</span>
                 </div>
-                <p style="color: #6B7280; font-size: 15px; margin-bottom: 0px; line-height: 1.4;">AI algorithm shows 25% better accuracy than competitors. Leverage for marketing differentiation</p>
+                <p style="color: #6B7280; font-size: 15px; margin-bottom: 0px; line-height: 1.4;">{report.get("tech_advantage", "N/A")}</p>
             </div>
             ''', unsafe_allow_html=True)
             
@@ -1184,14 +1235,14 @@ with tab4:
             <div style="font-weight: 600; color: #374151; font-size: 17px; margin-bottom: 12px; font-family: sans-serif;">Recommended Next Steps</div>
             <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
                 <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">1</div>
-                <span style="color: #4B5563; font-size: 15px;">Schedule pivot strategy meeting</span>
+                <span style="color: #4B5563; font-size: 15px;">{safe_get(report.get('next_steps', []), 0)}</span>
             </div>
             <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
                 <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">2</div>
-                <span style="color: #4B5563; font-size: 15px;">Prepare investor pitch deck</span>
+                <span style="color: #4B5563; font-size: 15px;">{safe_get(report.get('next_steps', []), 1)}</span>
             </div>
             <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
                 <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">3</div>
-                <span style="color: #4B5563; font-size: 15px;">Initiate partnership discussions</span>
+                <span style="color: #4B5563; font-size: 15px;">{safe_get(report.get('next_steps', []), 2)}</span>
             </div>
             ''', unsafe_allow_html=True)
