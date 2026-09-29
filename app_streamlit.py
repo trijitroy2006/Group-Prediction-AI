@@ -195,11 +195,13 @@ with tab2:
 
     if 'project_data' not in st.session_state:
         st.info('Submit a project idea in the Project Input tab to generate a Risk Assessment.')
+        data = {
+            'industry': 'Technology',
+            'budget': 100000,
+            'startup_name': 'Demo Project'
+        }
     else:
-        if 'project_data' in st.session_state:
-            data = st.session_state['project_data']
-        else:
-            data = {'industry': 'Technology', 'budget': 100000, 'startup_name': 'Demo Project'}
+        data = st.session_state['project_data']
         
     st.subheader("Risk Assessment Inputs")
 
@@ -228,227 +230,281 @@ with tab2:
 
     
 
-        from risk_engine import calculate_risk, get_risk_status, calculate_success_probability
-        from mitigation_engine import generate_mitigation
-        from improvement_engine import generate_improvements
-        risk_score = calculate_risk(market_competition, team_expertise, resource_availability, innovation_level, market_research)
-        risk_status = get_risk_status(risk_score)
-        success_probability = calculate_success_probability(risk_score)
+    from risk_engine import calculate_risk, get_risk_status, calculate_success_probability
+    from mitigation_engine import generate_mitigation
+    from improvement_engine import generate_improvements
+    risk_score = calculate_risk(market_competition, team_expertise, resource_availability, innovation_level, market_research)
+    risk_status = get_risk_status(risk_score)
+    success_probability = calculate_success_probability(risk_score)
 
-        # Prepare risk data for Milestone 3 mitigation engine
-        risk_data = [
-            {
-                "risk_category": "Market",
-                "risk_score": 80 if market_competition == "High" else 50,
-                "risk_description": "High competitor density",
-                "priority_level": "High" if market_competition == "High" else "Medium"
-            },
-            {
-                "risk_category": "Financial",
-                "risk_score": 75 if data.get("budget", 0) < 50000 else 45,
-                "risk_description": "Budget constraints",
-                "priority_level": "High" if data.get("budget", 0) < 50000 else "Medium"
-            },
-            {
-                "risk_category": "Technical",
-                "risk_score": 80 if team_expertise == "Low" else 40,
-                "risk_description": "Limited technical expertise",
-                "priority_level": "High" if team_expertise == "Low" else "Medium"
-            }
-        ]
-
-        # Generate Milestone 3 mitigation strategies
-        mitigation_results = generate_mitigation(risk_data)
-        market_data_for_improvements = market_analysis.get_market_data(
-            data.get("industry", "Technology"),
-            data.get("target_market", ""),
-            data.get("budget", 0),
-        )
-
-        from swot_analysis import generate_swot
-        swot = generate_swot(team_expertise, innovation_level, market_competition, resource_availability, market_research)
-
-        from feasibility import calculate_feasibility
-        feasibility_score = calculate_feasibility(market_opportunity, team_capability, competitive_advantage, resource_score)
-
-        risk_input_data = {
-            "market_competition": market_competition,
-            "team_expertise": team_expertise,
-            "resource_availability": resource_availability,
-            "innovation_level": innovation_level,
-            "market_research": market_research,
-            "risk_score": risk_score
+    # Prepare risk data for Milestone 3 mitigation engine
+    risk_data = [
+        {
+            "risk_category": "Market",
+            "risk_score": 80 if market_competition == "High" else 50,
+            "risk_description": "High competitor density",
+            "priority_level": "High" if market_competition == "High" else "Medium"
+        },
+        {
+            "risk_category": "Financial",
+            "risk_score": 75 if data.get("budget", 0) < 50000 else 45,
+            "risk_description": "Budget constraints",
+            "priority_level": "High" if data.get("budget", 0) < 50000 else "Medium"
+        },
+        {
+            "risk_category": "Technical",
+            "risk_score": 80 if team_expertise == "Low" else 40,
+            "risk_description": "Limited technical expertise",
+            "priority_level": "High" if team_expertise == "Low" else "Medium"
         }
+    ]
+
+    # Generate Milestone 3 mitigation strategies
+    mitigation_results = generate_mitigation(risk_data)
+    market_data_for_improvements = market_analysis.get_market_data(
+        data.get("industry", "Technology"),
+        data.get("target_market", ""),
+        data.get("budget", 0),
+    )
+
+    from swot_analysis import generate_swot
+    swot = generate_swot(team_expertise, innovation_level, market_competition, resource_availability, market_research)
+
+    from feasibility import calculate_feasibility
+    feasibility_score = calculate_feasibility(market_opportunity, team_capability, competitive_advantage, resource_score)
+
+    risk_input_data = {
+        "market_competition": market_competition,
+        "team_expertise": team_expertise,
+        "resource_availability": resource_availability,
+        "innovation_level": innovation_level,
+        "market_research": market_research,
+        "risk_score": risk_score
+    }
 
         # ============================================================
         # M3 - STRATEGIC RECOMMENDATIONS
         # ============================================================
 
-        recommendation_results = generate_recommendations(
-            data,
-            risk_input_data,
-            swot,
-            feasibility_score
-        )
+    recommendation_results = generate_recommendations(
+        data,
+        risk_input_data,
+        swot,
+        feasibility_score
+    )
 
         # ============================================================
         # M3 - IMPROVEMENT PLAN
         # ============================================================
 
-        improvement_results = generate_improvements(
-            data,
-            risk_input_data,
-            swot,
-            feasibility_score,
-            market_data=market_data_for_improvements,
-            mitigation_results=mitigation_results
-        )
+    improvement_results = generate_improvements(
+        data,
+        risk_input_data,
+        swot,
+        feasibility_score,
+        market_data=market_data_for_improvements,
+        mitigation_results=mitigation_results
+    )
 
-        project_id = st.session_state.get("project_id")
-        if project_id and not st.session_state.get("assessment_saved", False):
-            try:
-                database.save_assessment(
-                    project_id=project_id,
-                    swot_data=swot,
-                    risk_score=risk_score,
-                    risk_status=risk_status,
-                    success_probability=success_probability,
-                    recommendations=recommendation_results["recommendations"],
-                )
-                st.session_state["assessment_saved"] = True
-            except Exception as error:
-                print(f"Could not save the assessment to the database: {error}")
+    project_id = st.session_state.get("project_id")
+    if project_id and not st.session_state.get("assessment_saved", False):
+        try:
+            database.save_assessment(
+                project_id=project_id,
+                swot_data=swot,
+                risk_score=risk_score,
+                risk_status=risk_status,
+                success_probability=success_probability,
+                recommendations=recommendation_results["recommendations"],
+            )
+            st.session_state["assessment_saved"] = True
+        except Exception as error:
+            print(f"Could not save the assessment to the database: {error}")
 
         # Format SWOT bullets as HTML dots
         def format_swot(items):
             return "".join([f'<div style="margin-bottom:4px;">• {item}</div>' for item in items])
             st.markdown("<br>", unsafe_allow_html=True)
     
-        # FINAL DASHBOARD LAYOUT (3 columns) matching PDF mockup perfectly
-        r_col1, r_col2, r_col3 = st.columns([1, 1.5, 1])
-    
-        with r_col1:
-            st.markdown(f"""
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-    <h3 style="margin:0; font-size: 20px; color: #111827; font-family: sans-serif;">Risk Score</h3>
-    <span style="color: #DC2626; font-size: 18px;">&#9888;</span>
-    </div>
-    <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 16px; background: white; font-family: sans-serif;">
-    <div style="color: #6B7280; font-size: 16px; margin-bottom: 16px;">Overall Risk Score</div>
-    <div style="color: #DC2626; font-size: 60px; font-weight: 800; line-height: 1;">{risk_score}</div>
-    <div style="color: #DC2626; font-size: 15px; font-weight: 700; margin-top: 16px;">{risk_status}</div>
-    </div>
-    <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 16px; margin-bottom: 24px; background: white; font-family: sans-serif;">
-    <div style="color: #6B7280; font-size: 16px; margin-bottom: 12px;">Success Probability</div>
-    <div style="background: #E5E7EB; border-radius: 4px; height: 6px; width: 100%; margin-bottom: 8px;">
-    <div style="background: #DC2626; border-radius: 4px; height: 100%; width: {success_probability}%;"></div>
-    </div>
-    <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 600;">
-    <span style="color: #111827;">{success_probability}%</span>
-    <span style="color: #DC2626;">Low</span>
-    </div>
-    </div>
-    <h4 style="font-size: 18px; margin-bottom: 12px; color: #111827; font-family: sans-serif;">Key Risk Factors</h4>
-    <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; background: white; font-family: sans-serif;">
-    <div style="background: #FEF3C7; color: #D97706; padding: 6px; border-radius: 6px; font-size: 20px; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;">&#128101;</div>
-    <div>
-    <div style="font-size: 17px; font-weight: 600; color: #111827;">Team Expertise</div>
-    <div style="font-size: 15px; color: #6B7280;">{team_expertise} technical experience</div>
-    </div>
-    </div>
-    <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; background: white; font-family: sans-serif;">
-    <div style="background: #D1FAE5; color: #10B981; padding: 6px; border-radius: 6px; font-size: 20px; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;">&#128161;</div>
-    <div>
-    <div style="font-size: 17px; font-weight: 600; color: #111827;">Innovation Gap</div>
-    <div style="font-size: 15px; color: #6B7280;">{innovation_level} innovation potential</div>
-    </div>
-    </div>
-    """, unsafe_allow_html=True)
+        # ============================================================
+        # M2 RESULTS DASHBOARD
+        # ============================================================
 
-        with r_col2:
-            st.markdown(f"""
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-family: sans-serif;">
-    <h3 style="margin:0; font-size: 20px; color: #111827;">SWOT Analysis</h3>
-    <span style="color: #6B7280; font-size: 20px;">&#8862;</span>
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-family: sans-serif;">
-    <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 16px;">
-    <div style="color: #16A34A; font-weight: 600; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-    <span style="background: #16A34A; color: white; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">+</span> Strengths
-    </div>
-    <div style="color: #111827; font-size: 16px; line-height: 1.5;">
-    {format_swot(swot["Strengths"])}
-    </div>
-    </div>
-    <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 16px;">
-    <div style="color: #DC2626; font-weight: 600; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-    <span style="background: #DC2626; color: white; border-radius: 50%; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">-</span> Weaknesses
-    </div>
-    <div style="color: #111827; font-size: 16px; line-height: 1.5;">
-    {format_swot(swot["Weaknesses"])}
-    </div>
-    </div>
-    <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 16px; min-height: 180px;">
-    <div style="color: #2563EB; font-weight: 600; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-    <span style="color: #2563EB; font-size: 20px;">&#8599;</span> Opportunities
-    </div>
-    <div style="color: #111827; font-size: 16px; line-height: 1.5;">
-    {format_swot(swot["Opportunities"])}
-    </div>
-    </div>
-    <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 16px; min-height: 180px;">
-    <div style="color: #D97706; font-weight: 600; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-    <span style="color: #D97706; font-size: 18px;">&#9888;</span> Threats
-    </div>
-    <div style="color: #111827; font-size: 16px; line-height: 1.5;">
-    {format_swot(swot["Threats"])}
-    </div>
-    </div>
-    </div>
-    """, unsafe_allow_html=True)
+        st.divider()
+        st.subheader("Risk Assessment Results")
 
-        with r_col3:
-            st.markdown(f"""
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-family: sans-serif;">
-    <h3 style="margin:0; font-size: 20px; color: #111827;">Project Feasibility</h3>
-    <span style="color: white; background: #10B981; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">&#10004;</span>
-    </div>
-    <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 24px; background: white; font-family: sans-serif;">
-    <div style="color: #6B7280; font-size: 16px; margin-bottom: 16px;">Feasibility Score</div>
-    <div style="color: #10B981; font-size: 52px; font-weight: 800; line-height: 1;">{feasibility_score}%</div>
-    <div style="color: #9CA3AF; font-size: 14px; margin-top: 16px; line-height: 1.4; padding: 0 10px;">Moderate Feasibility with Significant Improvements Needed</div>
-    </div>
-    <h4 style="font-size: 18px; margin-bottom: 16px; color: #111827; font-family: sans-serif;">Assessment Metrics</h4>
+        # ------------------------------------------------------------
+        # TOP SUMMARY
+        # ------------------------------------------------------------
 
-    <div style="margin-bottom: 16px; font-family: sans-serif;">
-    <div style="display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 6px;">
-    <span style="color: #374151; font-weight: 500;">Team Capability</span>
-    <span style="color: #F59E0B; font-weight: 600;">{team_capability}%</span>
-    </div>
-    <div style="background: #E5E7EB; border-radius: 4px; height: 4px; width: 100%;">
-    <div style="background: #F59E0B; border-radius: 4px; height: 100%; width: {team_capability}%;"></div>
-    </div>
-    </div>
-    <div style="margin-bottom: 16px; font-family: sans-serif;">
-    <div style="display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 6px;">
-    <span style="color: #374151; font-weight: 500;">Competitive Advantage</span>
-    <span style="color: #DC2626; font-weight: 600;">{competitive_advantage}%</span>
-    </div>
-    <div style="background: #E5E7EB; border-radius: 4px; height: 4px; width: 100%;">
-    <div style="background: #DC2626; border-radius: 4px; height: 100%; width: {competitive_advantage}%;"></div>
-    </div>
-    </div>
-    <div style="margin-bottom: 16px; font-family: sans-serif;">
-    <div style="display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 6px;">
-    <span style="color: #374151; font-weight: 500;">Resource Availability</span>
-    <span style="color: #10B981; font-weight: 600;">{resource_score}%</span>
-    </div>
-    <div style="background: #E5E7EB; border-radius: 4px; height: 4px; width: 100%;">
-    <div style="background: #10B981; border-radius: 4px; height: 100%; width: {resource_score}%;"></div>
-    </div>
-    </div>
-    """, unsafe_allow_html=True)
+        summary_col1, summary_col2, summary_col3 = st.columns(3)
 
+        with summary_col1:
+            st.metric(
+                "Overall Risk Score",
+                f"{risk_score}/100",
+                risk_status
+            )
+
+        with summary_col2:
+            st.metric(
+                "Success Probability",
+                f"{success_probability}%"
+            )
+
+        with summary_col3:
+            st.metric(
+                "Feasibility Score",
+                f"{feasibility_score}%"
+            )
+
+        st.divider()
+
+        # ------------------------------------------------------------
+        # MAIN RESULTS AREA
+        # LEFT = KEY RISKS
+        # RIGHT = SWOT
+        # ------------------------------------------------------------
+
+        left_col, right_col = st.columns([1, 2])
+
+        # ============================================================
+        # LEFT COLUMN - KEY RISK FACTORS
+        # ============================================================
+
+        with left_col:
+
+            st.subheader("Key Risk Factors")
+
+            st.markdown(
+                f"""
+                **👥 Team Expertise**
+
+                {team_expertise} technical experience
+                """
+            )
+
+            st.markdown(
+                f"""
+                **💡 Innovation Level**
+
+                {innovation_level} innovation potential
+                """
+            )
+
+            st.markdown(
+                f"""
+                **📊 Market Competition**
+
+                {market_competition} competition
+                """
+            )
+
+            st.markdown(
+                f"""
+                **📦 Resource Availability**
+
+                {resource_availability}
+                """
+            )
+
+            st.markdown(
+                f"""
+                **🔎 Market Research**
+
+                {market_research}
+                """
+            )
+
+            # Risk status card
+            if risk_status == "HIGH RISK":
+                st.error(f"⚠️ **{risk_status}**")
+            elif risk_status == "MEDIUM RISK":
+                st.warning(f"⚠️ **{risk_status}**")
+            else:
+                st.success(f"✓ **{risk_status}**")
+
+        # ============================================================
+        # RIGHT COLUMN - SWOT
+        # ============================================================
+
+        with right_col:
+
+            st.subheader("SWOT Analysis")
+
+            swot_col1, swot_col2 = st.columns(2)
+
+            with swot_col1:
+
+                st.success("### 💪 Strengths")
+
+                for item in swot["Strengths"]:
+                    st.markdown(f"- {item}")
+
+                st.info("### 🚀 Opportunities")
+
+                for item in swot["Opportunities"]:
+                    st.markdown(f"- {item}")
+
+            with swot_col2:
+
+                st.error("### ⚠️ Weaknesses")
+
+                for item in swot["Weaknesses"]:
+                    st.markdown(f"- {item}")
+
+                st.warning("### 🔥 Threats")
+
+                for item in swot["Threats"]:
+                    st.markdown(f"- {item}")
+
+        st.divider()
+
+        # ------------------------------------------------------------
+        # PROJECT FEASIBILITY
+        # ------------------------------------------------------------
+
+        st.subheader("Project Feasibility")
+
+        feasibility_col1, feasibility_col2 = st.columns([1, 2])
+
+        with feasibility_col1:
+
+            st.metric(
+                "Feasibility Score",
+                f"{feasibility_score}%"
+            )
+
+            if feasibility_score >= 70:
+                st.success("Good Feasibility")
+            elif feasibility_score >= 40:
+                st.warning("Moderate Feasibility")
+            else:
+                st.error("Low Feasibility")
+
+        with feasibility_col2:
+
+            st.write("**Assessment Metrics**")
+
+            st.progress(
+                team_capability / 100,
+                text=f"Team Capability — {team_capability}%"
+            )
+
+            st.progress(
+                competitive_advantage / 100,
+                text=f"Competitive Advantage — {competitive_advantage}%"
+            )
+
+            st.progress(
+                resource_score / 100,
+                text=f"Resource Availability — {resource_score}%"
+            )
+
+            st.progress(
+                market_opportunity / 100,
+                text=f"Market Opportunity — {market_opportunity}%"
+            )
 
 with tab3:
     st.markdown("""
