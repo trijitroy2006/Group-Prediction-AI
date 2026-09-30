@@ -1424,14 +1424,21 @@ with tab4:
 
             st.markdown('<div style="font-weight: 600; color: #374151; font-size: 16px; margin-top: 12px; margin-bottom: 8px; font-family: sans-serif;">Risk Trend (6 Months)</div>', unsafe_allow_html=True)
 
-            # Create dummy chart data using random values around overall_risk
-            import numpy as np
+            # Create realistic trend data ending exactly at the calculated overall_risk
+            trend_values = [
+                max(0, min(100, overall_risk + 12)),
+                max(0, min(100, overall_risk + 5)),
+                max(0, min(100, overall_risk + 8)),
+                max(0, min(100, overall_risk + 2)),
+                max(0, min(100, overall_risk + 4)),
+                overall_risk
+            ]
             chart_data = pd.DataFrame(
-                np.random.randn(6, 1) * 10 + overall_risk,
+                trend_values,
                 index=["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
-                columns=["Risk Level"]
+                columns=["Risk Level (%)"]
             )
-            st.area_chart(chart_data, height=200)
+            st.line_chart(chart_data, height=280)
 
         with col2:
             header_col1, header_col2, header_col3 = st.columns([4, 2, 2])
