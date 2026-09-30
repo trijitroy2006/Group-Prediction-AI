@@ -4,6 +4,30 @@ import market_analysis
 import textwrap
 import database
 
+# ============================================================
+# RESTORE LAST SAVED PROJECT
+# ============================================================
+
+if "project_data" not in st.session_state:
+    try:
+        saved_project = database.get_latest_project()
+
+        if saved_project:
+            st.session_state["project_data"] = {
+                "startup_name": saved_project["startup_name"],
+                "industry": saved_project["industry"],
+                "business_model": saved_project["business_model"],
+                "target_market": saved_project["target_market"],
+                "budget": saved_project["budget"],
+                "project_description": saved_project["project_description"]
+            }
+
+            st.session_state["project_id"] = saved_project["id"]
+
+    except Exception as error:
+        print(f"Could not restore saved project: {error}")
+
+
 from recommendation_engine import generate_recommendations
 from llm_service import generate_llm_recommendations
 
@@ -14,6 +38,7 @@ try:
 except ImportError:
     LANGGRAPH_AVAILABLE = False
     from typing import TypedDict, Any 
+
 
 st.set_page_config(page_title="Prediction AI", layout="wide", initial_sidebar_state="collapsed")
 
@@ -313,14 +338,69 @@ with tab1:
     with col1:
         st.subheader("Project Submission")
         with st.form("project_form"):
-            startup_name = st.text_input("Startup/Project Name", placeholder="e.g., TechVenture AI")
-            industry = st.selectbox("Industry/Sector", ["Technology", "Healthcare", "Finance", "Education"], index=None, placeholder="Select an industry...")
-            business_model = st.selectbox("Business Model", ["SaaS", "B2B", "B2C", "Marketplace"], index=None, placeholder="Select a business model...")
+            startup_name = st.text_input(
+                "Startup/Project Name",
+                value=st.session_state.get("project_data", {}).get("startup_name", ""),
+                placeholder="e.g., TechVenture AI"
+            )
+
+
+            industry_options = ["Technology", "Healthcare", "Finance", "Education"]
+            saved_industry = st.session_state.get("project_data", {}).get("industry")
+
+            industry_index = (
+                industry_options.index(saved_industry)
+                if saved_industry in industry_options
+                else None
+            )
+
+            industry = st.selectbox(
+                "Industry/Sector",
+                industry_options,
+                index=industry_index,
+                placeholder="Select an industry..."
+            )
+
+
+            business_model_options = ["SaaS", "B2B", "B2C", "Marketplace"]
+            saved_business_model = st.session_state.get("project_data", {}).get("business_model")
+
+            business_model_index = (
+                business_model_options.index(saved_business_model)
+                if saved_business_model in business_model_options
+                else None
+            )
+
+            business_model = st.selectbox(
+                "Business Model",
+                business_model_options,
+                index=business_model_index,
+                placeholder="Select a business model..."
+            )
+
             
-            target_market = st.text_input("Target Market", placeholder="e.g., SMBs")
-            budget = st.number_input("Budget (USD)", min_value=0, value=None, placeholder="100000", step=10000)
-                
-            description = st.text_area("Project Description", placeholder="Brief description of your project idea...")
+            target_market = st.text_input(
+                "Target Market",
+                value=st.session_state.get("project_data", {}).get("target_market", ""),
+                placeholder="e.g., SMBs"
+            )
+
+
+            saved_budget = st.session_state.get("project_data", {}).get("budget")
+            budget = st.number_input(
+                "Budget (USD)",
+                min_value=0.0,
+                value=float(saved_budget) if saved_budget is not None else 0.0,
+                step=10000.0
+            )
+
+
+            description = st.text_area(
+                "Project Description",
+                value=st.session_state.get("project_data", {}).get("project_description", ""),
+                placeholder="Brief description of your project idea..."
+            )
+
             
             submitted = st.form_submit_button("Analyze Project")
             

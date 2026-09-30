@@ -155,3 +155,34 @@ def save_assessment(project_id, swot_data, risk_score, risk_status, success_prob
     finally:
         cur.close()
         conn.close()
+
+def get_latest_project():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute('''
+            SELECT
+                id,
+                startup_name,
+                industry,
+                business_model,
+                target_market,
+                budget,
+                project_description,
+                created_at
+            FROM projects
+            ORDER BY id DESC
+            LIMIT 1
+        ''')
+
+        project = cur.fetchone()
+
+        if project:
+            return dict(project)
+
+        return None
+
+    finally:
+        cur.close()
+        conn.close()
