@@ -121,7 +121,7 @@ def parse_dashboard_markdown(md_text):
         data["next_steps"] = [item.strip() for item in items]
     return data
 
-def generate_dashboard_report(project_data):
+def generate_project_analysis(project_data):
     if client is None:
         return None
     prompt = f"""

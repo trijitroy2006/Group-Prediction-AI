@@ -345,6 +345,15 @@ with tab1:
             #this will store the submitted projeect immediately
             st.session_state["project_data"] = project_data
             st.session_state["assessment_saved"] = False
+            
+            with st.spinner("Generating AI Analysis Results..."):
+                try:
+                    from llm_service import generate_project_analysis
+                    st.session_state['analysis_results'] = generate_project_analysis(project_data)
+                except Exception as e:
+                    st.error(f"Failed to load AI Engine: {e}")
+                    st.session_state['analysis_results'] = None
+                    
             st.session_state['has_analyzed'] = True
 
             #now to save it to postgresql
@@ -1332,17 +1341,7 @@ with tab4:
         data = st.session_state.get('project_data', {})
         industry = data.get('industry', 'Technology')
         budget = data.get('budget', 100000)
-
-        if 'dashboard_report' not in st.session_state:
-            with st.spinner("Generating AI Dashboard Report with Gemini..."):
-                try:
-                    from llm_service import generate_dashboard_report
-                    st.session_state['dashboard_report'] = generate_dashboard_report(data)
-                except Exception as e:
-                    st.error(f"Failed to load AI Engine: {e}")
-                    st.session_state['dashboard_report'] = None
-
-        report = st.session_state.get('dashboard_report')
+        report = st.session_state.get('analysis_results')
         if not report:
 
             report = {
@@ -1498,10 +1497,7 @@ with tab4:
                     <span style="color: #D97706; background: #FEF3C7; font-size: 14px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">High Priority</span>
                 </div>
                 <ul style="color: #6B7280; font-size: 16px; padding-left: 16px; margin-bottom: 0;">
-                <li style="font-size: 16px;"><b>{safe_get(kf, 0, 'title')}</b>: {safe_get(kf, 0, 'desc')}</li>
-                <li style="font-size: 16px;"><b>{safe_get(kf, 1, 'title')}</b>: {safe_get(kf, 1, 'desc')}</li>
-                <li style="font-size: 16px;"><b>{safe_get(kf, 2, 'title')}</b>: {safe_get(kf, 2, 'desc')}</li>
-                <li style="font-size: 16px;"><b>{safe_get(kf, 3, 'title')}</b>: {safe_get(kf, 3, 'desc')}</li>
+                {"".join([f'<li style="font-size: 16px;"><b>{item.get("title", "")}</b>: {item.get("desc", "")}</li>' for item in kf])}
             </ul>
             </div>
 
@@ -1511,9 +1507,7 @@ with tab4:
                     <span style="color: #2563EB; background: #DBEAFE; font-size: 14px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Medium Priority</span>
                 </div>
                 <p style="color: #6B7280; font-size: 16px; margin-bottom: 0;">
-                    <b>{safe_get(ra, 0, 'title')}:</b> {safe_get(ra, 0, 'desc')}<br>
-                    <b>{safe_get(ra, 1, 'title')}:</b> {safe_get(ra, 1, 'desc')}<br>
-                    <b>{safe_get(ra, 2, 'title')}:</b> {safe_get(ra, 2, 'desc')}
+                    {"".join([f'<b>{item.get("title", "")}:</b> {item.get("desc", "")}<br>' for item in ra])}
                 </p>
             </div>
 
@@ -1523,10 +1517,7 @@ with tab4:
                     <span style="color: #DC2626; background: #FEE2E2; font-size: 14px; font-weight: 600; padding: 2px 6px; border-radius: 12px;">Action Required</span>
                 </div>
                 <ol style="color: #6B7280; font-size: 16px; padding-left: 16px; margin-bottom: 0;">
-                <li style="font-size: 16px;">{safe_get(recs, 0)}</li>
-                <li style="font-size: 16px;">{safe_get(recs, 1)}</li>
-                <li style="font-size: 16px;">{safe_get(recs, 2)}</li>
-                <li style="font-size: 16px;">{safe_get(recs, 3)}</li>
+                {"".join([f'<li style="font-size: 16px;">{item}</li>' for item in recs])}
             </ol>
             </div>
             ''', unsafe_allow_html=True)
@@ -1574,17 +1565,9 @@ with tab4:
             st.markdown(f'''
 
             <div style="font-weight: 600; color: #374151; font-size: 17px; margin-bottom: 12px; font-family: sans-serif;">Recommended Next Steps</div>
-            <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
-                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">1</div>
-                <span style="color: #4B5563; font-size: 15px;">{safe_get(report.get('next_steps', []), 0)}</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
-                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">2</div>
-                <span style="color: #4B5563; font-size: 15px;">{safe_get(report.get('next_steps', []), 1)}</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
-                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">3</div>
-                <span style="color: #4B5563; font-size: 15px;">{safe_get(report.get('next_steps', []), 2)}</span>
-            </div>
+            {"".join([f'''<div style="display: flex; align-items: center; margin-bottom: 8px; font-family: sans-serif;">
+                <div style="background: #3B82F6; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: bold; margin-right: 8px;">{idx+1}</div>
+                <span style="color: #4B5563; font-size: 15px;">{item}</span>
+            </div>''' for idx, item in enumerate(report.get('next_steps', []))])}
             ''', unsafe_allow_html=True)
 
