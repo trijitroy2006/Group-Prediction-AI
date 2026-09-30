@@ -7,6 +7,14 @@ import database
 from recommendation_engine import generate_recommendations
 from llm_service import generate_llm_recommendations
 
+try:
+    from langgraph.graph import StateGraph, START, END
+    from typing import TypedDict, Any 
+    LANGGRAPH_AVAILABLE = True
+except ImportError:
+    LANGGRAPH_AVAILABLE = False
+    from typing import TypedDict, Any 
+
 st.set_page_config(page_title="Prediction AI", layout="wide", initial_sidebar_state="collapsed")
 
 # --- GLOBAL FONT SIZE OVERRIDE ---
@@ -98,6 +106,201 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4 = st.tabs(["Project Input", "Risk Assessment", "Recommendations", "Dashboard"])
+
+#M3 langgraph workflow
+class M3WorkflowState(TypedDict, total=False):
+    project_data: dict
+    market_data: dict
+    risk_input_data: dict
+    risk_score: int
+    risk_status: str
+    success_probability: int
+    swot: dict 
+    feasibility_score: int 
+    risk_data: list 
+    recommendations: dict
+    mitigation_results: list
+    improvement_results: list 
+    final_response: dict 
+
+def analyze_project(state: M3WorkflowState):
+    #collect project & market info
+    project_data = state.get("project_data", {})
+    market_data = market_analysis.get_market_data(
+        project_data.get("industry", "Technology"), 
+        project_data.get("target_market", ""),
+        project_data.get("budget", 0)
+    )
+
+    return {
+        "project_data": project_data,
+        "market_data": market_data
+    }
+
+def analyze_risks(state: M3WorkflowState):
+    """Node 2: Prepare the risk and feasibility context."""
+
+    return {
+        "risk_input_data": state["risk_input_data"],
+        "risk_score": state["risk_score"],
+        "risk_status": state["risk_status"],
+        "success_probability": state["success_probability"],
+        "swot": state["swot"],
+        "feasibility_score": state["feasibility_score"],
+        "risk_data": state["risk_data"]
+    }
+
+
+def generate_recommendation_node(state: M3WorkflowState):
+    """Node 3: Generate strategic recommendations."""
+
+    recommendations = generate_recommendations(
+        state["project_data"],
+        state["risk_input_data"],
+        state["swot"],
+        state["feasibility_score"]
+    )
+
+    return {
+        "recommendations": recommendations
+    }
+
+
+def generate_mitigation_node(state: M3WorkflowState):
+    """Node 4: Generate risk mitigation strategies."""
+
+    mitigation_results = generate_mitigation(
+        state["risk_data"]
+    )
+
+    return {
+        "mitigation_results": mitigation_results
+    }
+
+
+def generate_improvements_node(state: M3WorkflowState):
+    """Node 5: Generate project improvement suggestions."""
+
+    improvement_results = generate_improvements(
+        state["project_data"],
+        state["risk_input_data"],
+        state["swot"],
+        state["feasibility_score"],
+        market_data=state.get("market_data", {}),
+        mitigation_results=state.get("mitigation_results", [])
+    )
+
+    return {
+        "improvement_results": improvement_results
+    }
+
+
+def generate_final_response_node(state: M3WorkflowState):
+    """Node 6: Combine all M3 outputs into the final strategic response."""
+
+    project = state.get("project_data", {})
+    recommendations = state.get("recommendations", {})
+    mitigation = state.get("mitigation_results", [])
+    improvements = state.get("improvement_results", [])
+
+    final_response = {
+        "project_summary": {
+            "project_name": project.get("startup_name", "Unknown"),
+            "industry": project.get("industry", "Unknown"),
+            "business_model": project.get("business_model", "Unknown"),
+            "target_market": project.get("target_market", "Unknown"),
+            "budget": project.get("budget", 0),
+            "description": project.get("project_description", "")
+        },
+
+        "risk_summary": {
+            "risk_score": state.get("risk_score", 0),
+            "risk_status": state.get("risk_status", "UNKNOWN"),
+            "success_probability": state.get("success_probability", 0),
+            "feasibility_score": state.get("feasibility_score", 0)
+        },
+
+        "key_strategic_recommendations": recommendations.get(
+            "recommendations", []
+        ),
+
+        "risk_based_recommendations": [
+            rec for rec in recommendations.get("recommendations", [])
+            if rec.get("category") == "Risk"
+        ],
+
+        "mitigation_strategies": mitigation,
+
+        "improvement_suggestions": improvements,
+
+        "short_term_action_plan": recommendations.get(
+            "short_term_action_plan", []
+        ),
+
+        "long_term_action_plan": recommendations.get(
+            "long_term_action_plan", []
+        ),
+
+        "final_strategic_assessment": (
+            recommendations.get(
+                "overall_strategic_recommendation",
+                "Review the identified risks and implement the highest-priority mitigation actions."
+            )
+        )
+    }
+
+    return {
+        "final_response": final_response
+    }
+
+
+def build_m3_workflow():
+    """Build the required six-node LangGraph workflow."""
+
+    if not LANGGRAPH_AVAILABLE:
+        return None
+
+    workflow = StateGraph(M3WorkflowState)
+
+    workflow.add_node("analyze_project", analyze_project)
+    workflow.add_node("analyze_risks", analyze_risks)
+    workflow.add_node(
+        "generate_recommendations",
+        generate_recommendation_node
+    )
+    workflow.add_node(
+        "generate_mitigation",
+        generate_mitigation_node
+    )
+    workflow.add_node(
+        "generate_improvements",
+        generate_improvements_node
+    )
+    workflow.add_node(
+        "generate_final_response",
+        generate_final_response_node
+    )
+
+    workflow.add_edge(START, "analyze_project")
+    workflow.add_edge("analyze_project", "analyze_risks")
+    workflow.add_edge("analyze_risks", "generate_recommendations")
+    workflow.add_edge(
+        "generate_recommendations",
+        "generate_mitigation"
+    )
+    workflow.add_edge(
+        "generate_mitigation",
+        "generate_improvements"
+    )
+    workflow.add_edge(
+        "generate_improvements",
+        "generate_final_response"
+    )
+    workflow.add_edge("generate_final_response", END)
+
+    return workflow.compile()
+
+
 
 with tab1:
     st.markdown("""
@@ -875,193 +1078,236 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
 
-            agent_container = st.container()
-            agent_steps = [
-                ("Data Ingestion", "Collect project details and market data"),
-                ("Risk Analysis", "Evaluate business and technical risks"),
-                ("Strategic Reasoning", "Generate mitigation strategies"),
-                ("Validation", "Cross-check recommendations with data"),
-                ("Report Generation", "Create final assessment report"),
-            ]
 
-            def render_agent_steps(active_step=-1, completed_steps=0, faded=False):
-                cards = []
-                for index, (title, description) in enumerate(agent_steps):
-                    if index < completed_steps:
-                        state_class = "agent-step-complete agent-step-faded" if faded else "agent-step-complete"
-                        state_text = "Complete"
-                    elif index == active_step:
-                        state_class = "agent-step-active"
-                        state_text = "In progress"
-                    else:
-                        state_class = "agent-step-pending"
-                        state_text = "Queued"
+            # ========================================================
+            # ACTUAL LANGGRAPH WORKFLOW
+            # ========================================================
 
-                    connector_class = "agent-step-connector-complete" if index < completed_steps - 1 else "agent-step-connector-pending"
-                    connector = "" if index == len(agent_steps) - 1 else f'<div class="agent-step-connector {connector_class}"></div>'
-                    cards.append(f"""
-    <div class="agent-step-wrap">
-      <div class="agent-step-box {state_class}">
-        <div class="agent-step-copy">
-          <div class="agent-step-title">{title}</div>
-          <div class="agent-step-description">{description}</div>
-          <div class="agent-step-state">{state_text}</div>
-        </div>
-      </div>
-      {connector}
-    </div>
-    """)
-
-                return f"""
-    <style>
-    .agent-step-list {{
-        position: relative;
-        width: min(100%, 680px);
-        margin: 0 auto;
-        padding: 18px;
-        border: 1px solid rgba(255, 255, 255, 0.7);
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.34);
-        backdrop-filter: blur(20px) saturate(145%);
-        -webkit-backdrop-filter: blur(20px) saturate(145%);
-        box-shadow: 0 14px 30px rgba(31, 41, 55, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.75);
-        font-family: sans-serif;
-    }}
-    .agent-step-wrap {{
-        position: relative;
-    }}
-    .agent-step-box {{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 48px;
-        padding: 7px 10px;
-        border: 1px solid transparent;
-        border-radius: 12px;
-        box-sizing: border-box;
-        transition: all 0.35s ease;
-    }}
-    .agent-step-copy {{
-        width: 100%;
-        min-width: 0;
-        text-align: center;
-    }}
-    .agent-step-title {{
-        font-size: 19px;
-        font-weight: 700;
-        line-height: 1.2;
-    }}
-    .agent-step-description {{
-        margin-top: 3px;
-        font-size: 14px;
-        line-height: 1.4;
-    }}
-    .agent-step-state {{
-        margin-top: 4px;
-        font-size: 13px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-    }}
-    .agent-step-pending {{
-        color: #9CA3AF;
-        background: rgba(255, 255, 255, 0.24);
-    }}
-    .agent-step-pending .agent-step-state {{
-        color: #9CA3AF;
-    }}
-    .agent-step-active {{
-        color: #4338CA;
-        border-color: #6366F1;
-        background: rgba(224, 231, 255, 0.74);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14), 0 10px 22px rgba(79, 70, 229, 0.15);
-    }}
-    .agent-step-active .agent-step-description {{
-        color: #6366F1;
-    }}
-    .agent-step-active .agent-step-state {{
-        color: #4F46E5;
-    }}
-    .agent-step-complete {{
-        color: #047857;
-        border-color: #6EE7B7;
-        background: rgba(209, 250, 229, 0.56);
-    }}
-    .agent-step-complete .agent-step-description,
-    .agent-step-complete .agent-step-state {{
-        color: #059669;
-    }}
-    .agent-step-faded {{
-        border-color: rgba(110, 231, 183, 0.55);
-        background: rgba(209, 250, 229, 0.3);
-        box-shadow: none;
-    }}
-    .agent-step-connector {{
-        width: 2px;
-        height: 22px;
-        margin: 0 auto;
-    }}
-    .agent-step-connector-complete {{
-        background: linear-gradient(#10B981, #6EE7B7);
-    }}
-    .agent-step-connector-pending {{
-        background: linear-gradient(#CBD5E1, #E5E7EB);
-    }}
-    @media (max-width: 620px) {{
-        .agent-step-list {{
-            padding: 10px;
-        }}
-    }}
-    </style>
-    <div class="agent-step-list">{"".join(cards)}</div>
-    """
-
-            with agent_container:
-                agent_progress = st.empty()
-                agent_progress.markdown(render_agent_steps(), unsafe_allow_html=True)
-
-            st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
-            button_left, button_center, button_right = st.columns([1.2, 0.85, 0.8])
-            with button_center:
-                run_agent_workflow = st.button(
-                    "Run LangGraph Agent Workflow",
-                    use_container_width=False,
-                    type="primary",
-                )
+            run_agent_workflow = st.button(
+                "Run LangGraph Agent Workflow",
+                use_container_width=True,
+                type="primary"
+            )
 
             if run_agent_workflow:
-                import time
-                status = st.status("Initializing Agent Workflow...", expanded=True)
 
-                agent_progress.markdown(render_agent_steps(active_step=0), unsafe_allow_html=True)
-                status.update(label="Step 1: Data Ingestion...")
-                time.sleep(1)
-                status.write("✅ Collected project details and market parameters")
+                if not LANGGRAPH_AVAILABLE:
+                    st.error(
+                        "LangGraph is not installed. "
+                        "Install it with: pip install langgraph"
+                    )
 
-                agent_progress.markdown(render_agent_steps(active_step=1, completed_steps=1), unsafe_allow_html=True)
-                status.update(label="Step 2: Risk Analysis...")
-                time.sleep(1)
-                status.write("✅ Evaluated business and technical risks")
+                else:
+                    with st.spinner("Running M3 LangGraph workflow..."):
 
-                agent_progress.markdown(render_agent_steps(active_step=2, completed_steps=2), unsafe_allow_html=True)
-                status.update(label="Step 3: Strategic Reasoning...")
-                time.sleep(1.5)
-                status.write("✅ Generated mitigation strategies using Gemini reasoning")
+                        workflow = build_m3_workflow()
 
-                agent_progress.markdown(render_agent_steps(active_step=3, completed_steps=3), unsafe_allow_html=True)
-                status.update(label="Step 4: Validation...")
-                time.sleep(1)
-                status.write("✅ Cross-checked recommendations with dataset")
+                        initial_state = {
+                            "project_data": data,
+                            "risk_input_data": risk_input_data,
+                            "risk_score": risk_score,
+                            "risk_status": risk_status,
+                            "success_probability": success_probability,
+                            "swot": swot,
+                            "feasibility_score": feasibility_score,
+                            "risk_data": risk_data
+                        }
 
-                agent_progress.markdown(render_agent_steps(active_step=4, completed_steps=4), unsafe_allow_html=True)
-                status.update(label="Step 5: Report Generation...", state="complete")
-                time.sleep(0.5)
-                status.write("✅ Final assessment report successfully created!")
-                agent_progress.markdown(render_agent_steps(completed_steps=5), unsafe_allow_html=True)
-                time.sleep(5)
-                agent_progress.markdown(render_agent_steps(completed_steps=5, faded=True), unsafe_allow_html=True)
+                        workflow_result = workflow.invoke(
+                            initial_state
+                        )
 
-                st.success("Agent Workflow Complete! The recommended mitigation strategies have been finalized.")
+                        st.session_state["m3_workflow_result"] = workflow_result
+
+                    st.success(
+                        "LangGraph workflow completed successfully."
+                    )
+
+            # ========================================================
+            # FINAL STRATEGIC RESPONSE
+            # ========================================================
+
+            workflow_result = st.session_state.get(
+                "m3_workflow_result"
+            )
+
+            if workflow_result:
+
+                final_response = workflow_result.get(
+                    "final_response",
+                    {}
+                )
+
+                st.divider()
+                st.subheader("Final Strategic Response")
+
+                # Project Summary
+                st.markdown("### PROJECT SUMMARY")
+
+                project_summary = final_response.get(
+                    "project_summary",
+                    {}
+                )
+
+                st.write(
+                    f"**Project:** "
+                    f"{project_summary.get('project_name', 'N/A')}"
+                )
+
+                st.write(
+                    f"**Industry:** "
+                    f"{project_summary.get('industry', 'N/A')}"
+                )
+
+                st.write(
+                    f"**Target Market:** "
+                    f"{project_summary.get('target_market', 'N/A')}"
+                )
+
+                # Risk Summary
+                st.markdown("### RISK SUMMARY")
+
+                risk_summary = final_response.get(
+                    "risk_summary",
+                    {}
+                )
+
+                r1, r2, r3, r4 = st.columns(4)
+
+                r1.metric(
+                    "Risk Score",
+                    risk_summary.get("risk_score", 0)
+                )
+
+                r2.metric(
+                    "Risk Status",
+                    risk_summary.get("risk_status", "N/A")
+                )
+
+                r3.metric(
+                    "Success Probability",
+                    f"{risk_summary.get('success_probability', 0)}%"
+                )
+
+                r4.metric(
+                    "Feasibility",
+                    f"{risk_summary.get('feasibility_score', 0)}%"
+                )
+
+                # Strategic Recommendations
+                st.markdown(
+                    "### KEY STRATEGIC RECOMMENDATIONS"
+                )
+
+                for rec in final_response.get(
+                    "key_strategic_recommendations",
+                    []
+                ):
+                    st.markdown(
+                        f"**{rec.get('title', 'Recommendation')}** "
+                        f"— {rec.get('action', 'N/A')}"
+                    )
+
+                # Risk-Based Recommendations
+                st.markdown(
+                    "### RISK-BASED RECOMMENDATIONS"
+                )
+
+                risk_recommendations = final_response.get(
+                    "risk_based_recommendations",
+                    []
+                )
+
+                if risk_recommendations:
+                    for rec in risk_recommendations:
+                        st.markdown(
+                            f"- **{rec.get('title', 'Risk Recommendation')}**: "
+                            f"{rec.get('action', 'N/A')}"
+                        )
+                else:
+                    st.write(
+                        "No separate risk-category recommendations."
+                    )
+
+                # Mitigation
+                st.markdown(
+                    "### MITIGATION STRATEGIES"
+                )
+
+                for mitigation in final_response.get(
+                    "mitigation_strategies",
+                    []
+                ):
+                    st.markdown(
+                        f"**{mitigation.get('risk', 'Risk')}**"
+                    )
+                    st.write(
+                        mitigation.get(
+                            "mitigation_strategy",
+                            "N/A"
+                        )
+                    )
+
+                # Improvements
+                st.markdown(
+                    "### IMPROVEMENT SUGGESTIONS"
+                )
+
+                for improvement in final_response.get(
+                    "improvement_suggestions",
+                    []
+                ):
+                    st.markdown(
+                        f"**{improvement.get('title', 'Improvement')}** "
+                        f"({improvement.get('priority', 'Medium')})"
+                    )
+
+                    st.write(
+                        improvement.get(
+                            "improvement",
+                            improvement.get(
+                                "risk_reduction",
+                                "N/A"
+                            )
+                        )
+                    )
+
+                # Short-Term Plan
+                st.markdown(
+                    "### SHORT-TERM ACTION PLAN"
+                )
+
+                for action in final_response.get(
+                    "short_term_action_plan",
+                    []
+                ):
+                    st.markdown(f"- {action}")
+
+                # Long-Term Plan
+                st.markdown(
+                    "### LONG-TERM ACTION PLAN"
+                )
+
+                for action in final_response.get(
+                    "long_term_action_plan",
+                    []
+                ):
+                    st.markdown(f"- {action}")
+
+                # Final Assessment
+                st.markdown(
+                    "### FINAL STRATEGIC ASSESSMENT"
+                )
+
+                st.info(
+                    final_response.get(
+                        "final_strategic_assessment",
+                        "No final assessment available."
+                    )
+                )
+
+
+
 with tab4:
     st.markdown('''
 <h1 style="margin: 0; padding: 0; font-size: 32px; color: #111827; font-weight: 700; font-family: sans-serif; margin-bottom: 4px;">Dashboard & Deployment</h1>
