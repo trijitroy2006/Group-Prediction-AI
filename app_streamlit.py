@@ -4,28 +4,6 @@ import market_analysis
 import textwrap
 import database
 
-# ============================================================
-# RESTORE LAST SAVED PROJECT
-# ============================================================
-
-if "project_data" not in st.session_state:
-    try:
-        saved_project = database.get_latest_project()
-
-        if saved_project:
-            st.session_state["project_data"] = {
-                "startup_name": saved_project["startup_name"],
-                "industry": saved_project["industry"],
-                "business_model": saved_project["business_model"],
-                "target_market": saved_project["target_market"],
-                "budget": saved_project["budget"],
-                "project_description": saved_project["project_description"]
-            }
-
-            st.session_state["project_id"] = saved_project["id"]
-
-    except Exception as error:
-        print(f"Could not restore saved project: {error}")
 
 
 from recommendation_engine import generate_recommendations
@@ -41,6 +19,10 @@ except ImportError:
 
 
 st.set_page_config(page_title="Prediction AI", layout="wide", initial_sidebar_state="collapsed")
+
+if 'has_analyzed' not in st.session_state:
+    st.session_state['has_analyzed'] = False
+
 
 # --- GLOBAL FONT SIZE OVERRIDE ---
 st.markdown('''
@@ -131,16 +113,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-def reset_form_state():
-    keys_to_clear = [
-        "input_startup_name", "input_industry", "input_business_model",
-        "input_target_market", "input_budget", "input_description",
-        "project_data", "dashboard_report", "project_id", "assessment_saved", "m3_workflow_result"
-    ]
-    for key in keys_to_clear:
-        if key in st.session_state:
-            del st.session_state[key]
-    st.session_state['has_analyzed'] = False
 
 tab1, tab2, tab3, tab4 = st.tabs(["Project Input", "Risk Assessment", "Recommendations", "Dashboard"])
 
@@ -349,7 +321,6 @@ with tab1:
 
     with col1:
         st.subheader("Project Submission")
-        st.button("🔄 Start New Project", on_click=reset_form_state, use_container_width=True)
         
         with st.form("project_form"):
             startup_name = st.text_input("Startup/Project Name", key="input_startup_name", placeholder="e.g., TechVenture AI")
