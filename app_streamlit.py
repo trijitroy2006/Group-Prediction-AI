@@ -130,6 +130,17 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+
+def reset_form_state():
+    keys_to_clear = [
+        "input_startup_name", "input_industry", "input_business_model",
+        "input_target_market", "input_budget", "input_description",
+        "project_data", "dashboard_report"
+    ]
+    for key in keys_to_clear:
+        if key in st.session_state:
+            del st.session_state[key]
+
 tab1, tab2, tab3, tab4 = st.tabs(["Project Input", "Risk Assessment", "Recommendations", "Dashboard"])
 
 #M3 langgraph workflow
@@ -337,70 +348,15 @@ with tab1:
 
     with col1:
         st.subheader("Project Submission")
+        st.button("🔄 Start New Project", on_click=reset_form_state, use_container_width=True)
+        
         with st.form("project_form"):
-            startup_name = st.text_input(
-                "Startup/Project Name",
-                value=st.session_state.get("project_data", {}).get("startup_name", ""),
-                placeholder="e.g., TechVenture AI"
-            )
-
-
-            industry_options = ["Technology", "Healthcare", "Finance", "Education"]
-            saved_industry = st.session_state.get("project_data", {}).get("industry")
-
-            industry_index = (
-                industry_options.index(saved_industry)
-                if saved_industry in industry_options
-                else None
-            )
-
-            industry = st.selectbox(
-                "Industry/Sector",
-                industry_options,
-                index=industry_index,
-                placeholder="Select an industry..."
-            )
-
-
-            business_model_options = ["SaaS", "B2B", "B2C", "Marketplace"]
-            saved_business_model = st.session_state.get("project_data", {}).get("business_model")
-
-            business_model_index = (
-                business_model_options.index(saved_business_model)
-                if saved_business_model in business_model_options
-                else None
-            )
-
-            business_model = st.selectbox(
-                "Business Model",
-                business_model_options,
-                index=business_model_index,
-                placeholder="Select a business model..."
-            )
-
-            
-            target_market = st.text_input(
-                "Target Market",
-                value=st.session_state.get("project_data", {}).get("target_market", ""),
-                placeholder="e.g., SMBs"
-            )
-
-
-            saved_budget = st.session_state.get("project_data", {}).get("budget")
-            budget = st.number_input(
-                "Budget (USD)",
-                min_value=0.0,
-                value=float(saved_budget) if saved_budget is not None else 0.0,
-                step=10000.0
-            )
-
-
-            description = st.text_area(
-                "Project Description",
-                value=st.session_state.get("project_data", {}).get("project_description", ""),
-                placeholder="Brief description of your project idea..."
-            )
-
+            startup_name = st.text_input("Startup/Project Name", key="input_startup_name", placeholder="e.g., TechVenture AI")
+            industry = st.selectbox("Industry/Sector", ["Technology", "Healthcare", "Finance", "Education"], index=None, placeholder="Select an industry...", key="input_industry")
+            business_model = st.selectbox("Business Model", ["SaaS", "B2B", "B2C", "Marketplace"], index=None, placeholder="Select a business model...", key="input_business_model")
+            target_market = st.text_input("Target Market", placeholder="e.g., SMBs", key="input_target_market")
+            budget = st.number_input("Budget (USD)", min_value=0.0, value=None, step=10000.0, key="input_budget")
+            description = st.text_area("Project Description", placeholder="Brief description of your project idea...", key="input_description")
             
             submitted = st.form_submit_button("Analyze Project")
             
