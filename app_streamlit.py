@@ -769,7 +769,7 @@ with tab3:
 """, unsafe_allow_html=True)
 
     if not st.session_state.get('has_analyzed', False):
-        st.info("≡ƒæê Please enter project details and click 'Analyze Project' to view AI Recommendations.")
+        st.info("💡 Please enter project details and click 'Analyze Project' to view AI Recommendations.")
     else:
         data = st.session_state.get('project_data', {})
 
@@ -1261,7 +1261,7 @@ with tab3:
                 ):
                     st.markdown(
                         f"**{rec.get('title', 'Recommendation')}** "
-                        f"ΓÇö {rec.get('action', 'N/A')}"
+                        f"- {rec.get('action', 'N/A')}"
                     )
 
                 # Risk-Based Recommendations
@@ -1372,7 +1372,7 @@ with tab4:
 ''', unsafe_allow_html=True)
 
     if not st.session_state.get('has_analyzed', False):
-        st.info("≡ƒæê Please enter project details and click 'Analyze Project' to view the Dashboard.")
+        st.info("💡 Please enter project details and click 'Analyze Project' to view the Dashboard.")
     else:
         data = st.session_state.get('project_data', {})
 
@@ -1504,15 +1504,15 @@ with tab4:
     4. Develop MVP to validate market fit
     """
             with header_col2:
-                st.download_button(label="≡ƒôÑ Export", data=report_markdown, file_name="risk_assessment_report.md", mime="text/markdown", use_container_width=True)
+                st.download_button(label="📥 Export", data=report_markdown, file_name="risk_assessment_report.md", mime="text/markdown", use_container_width=True)
             with header_col3:
-                with st.popover("≡ƒöù Share", use_container_width=True):
+                with st.popover("🔗 Share", use_container_width=True):
                     st.write("**Share this report securely:**")
                     report_url = "http://localhost:8501/?view=dashboard&report_id=latest"
                     report_title = "Prediction AI - Risk Assessment Report"
                     st.code(report_url)
                     if st.button("Copy Link", use_container_width=True):
-                        st.toast("Report link copied to clipboard! ≡ƒôï")
+                        st.toast("Report link copied to clipboard! ✅")
 
                     st.divider()
                     st.markdown('<div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Share via:</div>', unsafe_allow_html=True)
@@ -1522,11 +1522,11 @@ with tab4:
                         import urllib.parse
                         subject = urllib.parse.quote(report_title)
                         body = urllib.parse.quote(f"Check out my project risk report: {report_url}")
-                        st.markdown(f'<a href="mailto:?subject={subject}&body={body}" style="display: block; text-align: center; background: #EA4335; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">≡ƒôº Email</a>', unsafe_allow_html=True)
-                        st.markdown(f'<a href="https://wa.me/?text=Check%20out%20my%20project%20risk%20report:%20{report_url}" target="_blank" style="display: block; text-align: center; background: #25D366; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">≡ƒÆ¼ WhatsApp</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="mailto:?subject={subject}&body={body}" style="display: block; text-align: center; background: #EA4335; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📧 Email</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="https://wa.me/?text=Check%20out%20my%20project%20risk%20report:%20{report_url}" target="_blank" style="display: block; text-align: center; background: #25D366; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">💬 WhatsApp</a>', unsafe_allow_html=True)
                     with s2:
-                        st.markdown(f'<a href="sms:?body=Check out my project risk report: {report_url}" target="_blank" style="display: block; text-align: center; background: #3B82F6; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">≡ƒô▒ Messages</a>', unsafe_allow_html=True)
-                        st.markdown(f'<a href="https://www.linkedin.com/sharing/share-offsite/?url=http://localhost:8501" target="_blank" style="display: block; text-align: center; background: #0A66C2; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">≡ƒÆ╝ LinkedIn</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="sms:?body=Check out my project risk report: {report_url}" target="_blank" style="display: block; text-align: center; background: #3B82F6; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📱 Messages</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="https://www.linkedin.com/sharing/share-offsite/?url=http://localhost:8501" target="_blank" style="display: block; text-align: center; background: #0A66C2; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">💼 LinkedIn</a>', unsafe_allow_html=True)
 
             st.markdown(f'''
             <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
@@ -1561,7 +1561,7 @@ with tab4:
             ''', unsafe_allow_html=True)
 
         with col3:
-            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 18px; margin-bottom: 12px; font-family: sans-serif;">Strategic Insights ≡ƒÆí</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 18px; margin-bottom: 12px; font-family: sans-serif;">Strategic Insights 🚀</div>', unsafe_allow_html=True)
 
             st.markdown(f'''
             <div style="border-left: 3px solid #EF4444; padding-left: 12px; margin-bottom: 8px; font-family: sans-serif;">
@@ -1573,11 +1573,11 @@ with tab4:
             </div>
             ''', unsafe_allow_html=True)
 
-            with st.popover("See funding options Γåù", use_container_width=True):
+            with st.popover("See funding options 👉", use_container_width=True):
                 st.markdown("**Recommended Funding Options**")
-                st.info("≡ƒÆ╕ **Bridge Round:** Seek $500k convertible note from existing investors.")
-                st.success("≡ƒñ¥ **Strategic Partnership:** Co-develop with enterprise client to offset R&D costs.")
-                st.warning("≡ƒöä **Pivot:** Shift to a high-margin B2B SaaS model to achieve faster profitability.")
+                st.info("🏙️ **Bridge Round:** Seek $500k convertible note from existing investors.")
+                st.success("🤝 **Strategic Partnership:** Co-develop with enterprise client to offset R&D costs.")
+                st.warning("🔄 **Pivot:** Shift to a high-margin B2B SaaS model to achieve faster profitability.")
 
             st.markdown('<div style="margin-bottom: 16px;"></div>', unsafe_allow_html=True)
 
@@ -1591,7 +1591,7 @@ with tab4:
             </div>
             ''', unsafe_allow_html=True)
 
-            with st.popover("View comparison ≡ƒôè", use_container_width=True):
+            with st.popover("View comparison 📊", use_container_width=True):
                 st.markdown("**Technical Performance vs Competitors**")
                 comparison_data = pd.DataFrame({
                     "Accuracy (%)": [92, 75, 68, 54]
