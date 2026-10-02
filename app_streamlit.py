@@ -414,69 +414,107 @@ with tab2:
 <p style="margin: 4px 0 24px 0; color: #6B7280; font-size: 19px; font-family: sans-serif;">AI-powered risk scoring and strategic evaluation</p>
 """, unsafe_allow_html=True)
 
-    if not st.session_state.get('has_analyzed', False):
-        st.info("👈 Please enter project details and click 'Analyze Project' to view Risk Assessment insights.")
-    else:
-        data = st.session_state.get('project_data', {})
+    data = st.session_state.get('project_data', {})
 
 
-        st.subheader("Risk Assessment Inputs")
+    st.subheader("Risk Assessment Inputs")
 
-        col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-        with col1:
-            market_competition = st.selectbox("Market Competition", ["Low", "Medium", "High"])
-            team_expertise = st.selectbox("Team Expertise", ["Low", "Medium", "High"])
-            resource_availability = st.selectbox("Resource Availability", ["Limited", "Moderate", "Good"])
+    with col1:
+        market_competition = st.selectbox("Market Competition", ["Low", "Medium", "High"])
+        team_expertise = st.selectbox("Team Expertise", ["Low", "Medium", "High"])
+        resource_availability = st.selectbox("Resource Availability", ["Limited", "Moderate", "Good"])
 
-        with col2:
-            innovation_level = st.selectbox("Innovation Level", ["Low", "Medium", "High"])
-            market_research = st.selectbox("Market Research Quality", ["Limited", "Moderate", "Strong"])
+    with col2:
+        innovation_level = st.selectbox("Innovation Level", ["Low", "Medium", "High"])
+        market_research = st.selectbox("Market Research Quality", ["Limited", "Moderate", "Strong"])
 
-        st.subheader("Project Feasibility Inputs")
+    st.subheader("Project Feasibility Inputs")
 
-        col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-        with col1:
-            market_opportunity = st.slider("Market Opportunity Score", 0, 100, 50)
-            team_capability = st.slider("Team Capability Score", 0, 100, 50)
+    with col1:
+        market_opportunity = st.slider("Market Opportunity Score", 0, 100, 50)
+        team_capability = st.slider("Team Capability Score", 0, 100, 50)
 
-        with col2:
-            competitive_advantage = st.slider("Competitive Advantage Score", 0, 100, 50)
-            resource_score = st.slider("Resource Availability Score", 0, 100, 50)
+    with col2:
+        competitive_advantage = st.slider("Competitive Advantage Score", 0, 100, 50)
+        resource_score = st.slider("Resource Availability Score", 0, 100, 50)
 
 
 
+    # Empty State Handling
+    if not (st.session_state.get('has_analyzed', False) or 'risk_assessment_data' in st.session_state):
+        st.info("💡 Complete project details on the Project Input tab and click 'Analyze Project', or click 'Evaluate Risk' below to generate risk insights.")
+        if st.button("Evaluate Risk"):
+            st.session_state['has_analyzed'] = True
+            st.rerun()
+
+    if st.session_state.get('has_analyzed', False) or 'risk_assessment_data' in st.session_state:
         from risk_engine import calculate_risk, get_risk_status, calculate_success_probability
         from mitigation_engine import generate_mitigation
         from improvement_engine import generate_improvements
-        risk_score = calculate_risk(market_competition, team_expertise, resource_availability, innovation_level, market_research)
-        risk_status = get_risk_status(risk_score)
-        success_probability = calculate_success_probability(risk_score)
-
-        # Prepare risk data for Milestone 3 mitigation engine
-        risk_data = [
-            {
-                "risk_category": "Market",
-                "risk_score": 80 if market_competition == "High" else 50,
-                "risk_description": "High competitor density",
-                "priority_level": "High" if market_competition == "High" else "Medium"
-            },
-            {
-                "risk_category": "Financial",
-                "risk_score": 75 if data.get("budget", 0) < 50000 else 45,
-                "risk_description": "Budget constraints",
-                "priority_level": "High" if data.get("budget", 0) < 50000 else "Medium"
-            },
-            {
-                "risk_category": "Technical",
-                "risk_score": 80 if team_expertise == "Low" else 40,
-                "risk_description": "Limited technical expertise",
-                "priority_level": "High" if team_expertise == "Low" else "Medium"
+        from swot_analysis import generate_swot
+        from feasibility import calculate_feasibility
+        import market_analysis
+        import database
+        
+        def calculate_risk_and_swot(mc, te, ra, il, mr, mo, tc, ca, rs):
+            r_score = calculate_risk(mc, te, ra, il, mr)
+            r_status = get_risk_status(r_score)
+            s_prob = calculate_success_probability(r_score)
+            
+            r_data = [
+                {
+                    "risk_category": "Market",
+                    "risk_score": 80 if mc == "High" else 50,
+                    "risk_description": "High competitor density",
+                    "priority_level": "High" if mc == "High" else "Medium"
+                },
+                {
+                    "risk_category": "Financial",
+                    "risk_score": 75 if data.get("budget", 0) < 50000 else 45,
+                    "risk_description": "Budget constraints",
+                    "priority_level": "High" if data.get("budget", 0) < 50000 else "Medium"
+                },
+                {
+                    "risk_category": "Technical",
+                    "risk_score": 80 if te == "Low" else 40,
+                    "risk_description": "Limited technical expertise",
+                    "priority_level": "High" if te == "Low" else "Medium"
+                }
+            ]
+            
+            sw = generate_swot(te, il, mc, ra, mr)
+            f_score = calculate_feasibility(mo, tc, ca, rs)
+            
+            return {
+                'risk_score': r_score,
+                'risk_status': r_status,
+                'success_probability': s_prob,
+                'risk_data': r_data,
+                'swot': sw,
+                'feasibility_score': f_score
             }
-        ]
+            
+        # Update state dynamically with current inputs
+        st.session_state['risk_assessment_data'] = calculate_risk_and_swot(
+            market_competition, team_expertise, resource_availability, 
+            innovation_level, market_research, 
+            market_opportunity, team_capability, 
+            competitive_advantage, resource_score
+        )
+        
+        # Read dynamically from session state
+        results = st.session_state['risk_assessment_data']
+        risk_score = results['risk_score']
+        risk_status = results['risk_status']
+        success_probability = results['success_probability']
+        risk_data = results['risk_data']
+        swot = results['swot']
+        feasibility_score = results['feasibility_score']
 
-        # Generate Milestone 3 mitigation strategies
         mitigation_results = generate_mitigation(risk_data)
         market_data_for_improvements = market_analysis.get_market_data(
             data.get("industry", "Technology"),
@@ -731,7 +769,7 @@ with tab3:
 """, unsafe_allow_html=True)
 
     if not st.session_state.get('has_analyzed', False):
-        st.info("👈 Please enter project details and click 'Analyze Project' to view AI Recommendations.")
+        st.info("≡ƒæê Please enter project details and click 'Analyze Project' to view AI Recommendations.")
     else:
         data = st.session_state.get('project_data', {})
 
@@ -1223,7 +1261,7 @@ with tab3:
                 ):
                     st.markdown(
                         f"**{rec.get('title', 'Recommendation')}** "
-                        f"— {rec.get('action', 'N/A')}"
+                        f"ΓÇö {rec.get('action', 'N/A')}"
                     )
 
                 # Risk-Based Recommendations
@@ -1334,7 +1372,7 @@ with tab4:
 ''', unsafe_allow_html=True)
 
     if not st.session_state.get('has_analyzed', False):
-        st.info("👈 Please enter project details and click 'Analyze Project' to view the Dashboard.")
+        st.info("≡ƒæê Please enter project details and click 'Analyze Project' to view the Dashboard.")
     else:
         data = st.session_state.get('project_data', {})
 
@@ -1466,15 +1504,15 @@ with tab4:
     4. Develop MVP to validate market fit
     """
             with header_col2:
-                st.download_button(label="📥 Export", data=report_markdown, file_name="risk_assessment_report.md", mime="text/markdown", use_container_width=True)
+                st.download_button(label="≡ƒôÑ Export", data=report_markdown, file_name="risk_assessment_report.md", mime="text/markdown", use_container_width=True)
             with header_col3:
-                with st.popover("🔗 Share", use_container_width=True):
+                with st.popover("≡ƒöù Share", use_container_width=True):
                     st.write("**Share this report securely:**")
                     report_url = "http://localhost:8501/?view=dashboard&report_id=latest"
                     report_title = "Prediction AI - Risk Assessment Report"
                     st.code(report_url)
                     if st.button("Copy Link", use_container_width=True):
-                        st.toast("Report link copied to clipboard! 📋")
+                        st.toast("Report link copied to clipboard! ≡ƒôï")
 
                     st.divider()
                     st.markdown('<div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Share via:</div>', unsafe_allow_html=True)
@@ -1484,11 +1522,11 @@ with tab4:
                         import urllib.parse
                         subject = urllib.parse.quote(report_title)
                         body = urllib.parse.quote(f"Check out my project risk report: {report_url}")
-                        st.markdown(f'<a href="mailto:?subject={subject}&body={body}" style="display: block; text-align: center; background: #EA4335; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📧 Email</a>', unsafe_allow_html=True)
-                        st.markdown(f'<a href="https://wa.me/?text=Check%20out%20my%20project%20risk%20report:%20{report_url}" target="_blank" style="display: block; text-align: center; background: #25D366; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">💬 WhatsApp</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="mailto:?subject={subject}&body={body}" style="display: block; text-align: center; background: #EA4335; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">≡ƒôº Email</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="https://wa.me/?text=Check%20out%20my%20project%20risk%20report:%20{report_url}" target="_blank" style="display: block; text-align: center; background: #25D366; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">≡ƒÆ¼ WhatsApp</a>', unsafe_allow_html=True)
                     with s2:
-                        st.markdown(f'<a href="sms:?body=Check out my project risk report: {report_url}" target="_blank" style="display: block; text-align: center; background: #3B82F6; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">📱 Messages</a>', unsafe_allow_html=True)
-                        st.markdown(f'<a href="https://www.linkedin.com/sharing/share-offsite/?url=http://localhost:8501" target="_blank" style="display: block; text-align: center; background: #0A66C2; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">💼 LinkedIn</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="sms:?body=Check out my project risk report: {report_url}" target="_blank" style="display: block; text-align: center; background: #3B82F6; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">≡ƒô▒ Messages</a>', unsafe_allow_html=True)
+                        st.markdown(f'<a href="https://www.linkedin.com/sharing/share-offsite/?url=http://localhost:8501" target="_blank" style="display: block; text-align: center; background: #0A66C2; color: white; padding: 6px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-bottom: 8px; font-weight: 600;">≡ƒÆ╝ LinkedIn</a>', unsafe_allow_html=True)
 
             st.markdown(f'''
             <div style="border: 1px solid #E5E7EB; border-radius: 6px; padding: 16px; margin-bottom: 16px; background: white; font-family: sans-serif;">
@@ -1523,7 +1561,7 @@ with tab4:
             ''', unsafe_allow_html=True)
 
         with col3:
-            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 18px; margin-bottom: 12px; font-family: sans-serif;">Strategic Insights 💡</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-weight: 600; color: #374151; font-size: 18px; margin-bottom: 12px; font-family: sans-serif;">Strategic Insights ≡ƒÆí</div>', unsafe_allow_html=True)
 
             st.markdown(f'''
             <div style="border-left: 3px solid #EF4444; padding-left: 12px; margin-bottom: 8px; font-family: sans-serif;">
@@ -1535,11 +1573,11 @@ with tab4:
             </div>
             ''', unsafe_allow_html=True)
 
-            with st.popover("See funding options ↗", use_container_width=True):
+            with st.popover("See funding options Γåù", use_container_width=True):
                 st.markdown("**Recommended Funding Options**")
-                st.info("💸 **Bridge Round:** Seek $500k convertible note from existing investors.")
-                st.success("🤝 **Strategic Partnership:** Co-develop with enterprise client to offset R&D costs.")
-                st.warning("🔄 **Pivot:** Shift to a high-margin B2B SaaS model to achieve faster profitability.")
+                st.info("≡ƒÆ╕ **Bridge Round:** Seek $500k convertible note from existing investors.")
+                st.success("≡ƒñ¥ **Strategic Partnership:** Co-develop with enterprise client to offset R&D costs.")
+                st.warning("≡ƒöä **Pivot:** Shift to a high-margin B2B SaaS model to achieve faster profitability.")
 
             st.markdown('<div style="margin-bottom: 16px;"></div>', unsafe_allow_html=True)
 
@@ -1553,7 +1591,7 @@ with tab4:
             </div>
             ''', unsafe_allow_html=True)
 
-            with st.popover("View comparison 📊", use_container_width=True):
+            with st.popover("View comparison ≡ƒôè", use_container_width=True):
                 st.markdown("**Technical Performance vs Competitors**")
                 comparison_data = pd.DataFrame({
                     "Accuracy (%)": [92, 75, 68, 54]
