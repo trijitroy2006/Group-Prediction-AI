@@ -576,190 +576,190 @@ with tab2:
             except Exception as error:
                 print(f"Could not save the assessment to the database: {error}")
 
-            # Format SWOT bullets as HTML dots
-            def format_swot(items):
-                return "".join([f'<div style="margin-bottom:4px;">• {item}</div>' for item in items])
-                st.markdown("<br>", unsafe_allow_html=True)
+        # Format SWOT bullets as HTML dots
+        def format_swot(items):
+            return "".join([f'<div style="margin-bottom:4px;">• {item}</div>' for item in items])
+            st.markdown("<br>", unsafe_allow_html=True)
 
-            # ============================================================
-            # M2 RESULTS DASHBOARD
-            # ============================================================
+        # ============================================================
+        # M2 RESULTS DASHBOARD
+        # ============================================================
 
-            st.divider()
-            st.subheader("Risk Assessment Results")
+        st.divider()
+        st.subheader("Risk Assessment Results")
 
-            # ------------------------------------------------------------
-            # TOP SUMMARY
-            # ------------------------------------------------------------
+        # ------------------------------------------------------------
+        # TOP SUMMARY
+        # ------------------------------------------------------------
 
-            summary_col1, summary_col2, summary_col3 = st.columns(3)
+        summary_col1, summary_col2, summary_col3 = st.columns(3)
 
-            with summary_col1:
-                st.metric(
-                    "Overall Risk Score",
-                    f"{risk_score}/100",
-                    risk_status
-                )
+        with summary_col1:
+            st.metric(
+                "Overall Risk Score",
+                f"{risk_score}/100",
+                risk_status
+            )
 
-            with summary_col2:
-                st.metric(
-                    "Success Probability",
-                    f"{success_probability}%"
-                )
+        with summary_col2:
+            st.metric(
+                "Success Probability",
+                f"{success_probability}%"
+            )
 
-            with summary_col3:
-                st.metric(
-                    "Feasibility Score",
-                    f"{feasibility_score}%"
-                )
+        with summary_col3:
+            st.metric(
+                "Feasibility Score",
+                f"{feasibility_score}%"
+            )
 
-            st.divider()
+        st.divider()
 
-            # ------------------------------------------------------------
-            # MAIN RESULTS AREA
-            # LEFT = KEY RISKS
-            # RIGHT = SWOT
-            # ------------------------------------------------------------
+        # ------------------------------------------------------------
+        # MAIN RESULTS AREA
+        # LEFT = KEY RISKS
+        # RIGHT = SWOT
+        # ------------------------------------------------------------
 
-            left_col, right_col = st.columns([1, 2])
+        left_col, right_col = st.columns([1, 2])
 
-            # ============================================================
-            # LEFT COLUMN - KEY RISK FACTORS
-            # ============================================================
+        # ============================================================
+        # LEFT COLUMN - KEY RISK FACTORS
+        # ============================================================
 
-            with left_col:
+        with left_col:
 
-                st.subheader("Key Risk Factors")
+            st.subheader("Key Risk Factors")
 
-                st.markdown(
-                    f"""
-                    **👥 Team Expertise**
+            st.markdown(
+                f"""
+                **👥 Team Expertise**
 
-                    {team_expertise} technical experience
-                    """
-                )
+                {team_expertise} technical experience
+                """
+            )
 
-                st.markdown(
-                    f"""
-                    **💡 Innovation Level**
+            st.markdown(
+                f"""
+                **💡 Innovation Level**
 
-                    {innovation_level} innovation potential
-                    """
-                )
+                {innovation_level} innovation potential
+                """
+            )
 
-                st.markdown(
-                    f"""
-                    **📊 Market Competition**
+            st.markdown(
+                f"""
+                **📊 Market Competition**
 
-                    {market_competition} competition
-                    """
-                )
+                {market_competition} competition
+                """
+            )
 
-                st.markdown(
-                    f"""
-                    **📦 Resource Availability**
+            st.markdown(
+                f"""
+                **📦 Resource Availability**
 
-                    {resource_availability}
-                    """
-                )
+                {resource_availability}
+                """
+            )
 
-                st.markdown(
-                    f"""
-                    **🔎 Market Research**
+            st.markdown(
+                f"""
+                **🔎 Market Research**
 
-                    {market_research}
-                    """
-                )
+                {market_research}
+                """
+            )
 
-                # Risk status card
-                if risk_status == "HIGH RISK":
-                    st.error(f"⚠️ **{risk_status}**")
-                elif risk_status == "MEDIUM RISK":
-                    st.warning(f"⚠️ **{risk_status}**")
-                else:
-                    st.success(f"✓ **{risk_status}**")
+            # Risk status card
+            if risk_status == "HIGH RISK":
+                st.error(f"⚠️ **{risk_status}**")
+            elif risk_status == "MEDIUM RISK":
+                st.warning(f"⚠️ **{risk_status}**")
+            else:
+                st.success(f"✓ **{risk_status}**")
 
-            # ============================================================
-            # RIGHT COLUMN - SWOT
-            # ============================================================
+        # ============================================================
+        # RIGHT COLUMN - SWOT
+        # ============================================================
 
-            with right_col:
+        with right_col:
 
-                st.subheader("SWOT Analysis")
+            st.subheader("SWOT Analysis")
 
-                swot_col1, swot_col2 = st.columns(2)
+            swot_col1, swot_col2 = st.columns(2)
 
-                with swot_col1:
+            with swot_col1:
 
-                    st.success("### 💪 Strengths")
+                st.success("### 💪 Strengths")
 
-                    for item in swot["Strengths"]:
-                        st.markdown(f"- {item}")
+                for item in swot["Strengths"]:
+                    st.markdown(f"- {item}")
 
-                    st.info("### 🚀 Opportunities")
+                st.info("### 🚀 Opportunities")
 
-                    for item in swot["Opportunities"]:
-                        st.markdown(f"- {item}")
+                for item in swot["Opportunities"]:
+                    st.markdown(f"- {item}")
 
-                with swot_col2:
+            with swot_col2:
 
-                    st.error("### ⚠️ Weaknesses")
+                st.error("### ⚠️ Weaknesses")
 
-                    for item in swot["Weaknesses"]:
-                        st.markdown(f"- {item}")
+                for item in swot["Weaknesses"]:
+                    st.markdown(f"- {item}")
 
-                    st.warning("### 🔥 Threats")
+                st.warning("### 🔥 Threats")
 
-                    for item in swot["Threats"]:
-                        st.markdown(f"- {item}")
+                for item in swot["Threats"]:
+                    st.markdown(f"- {item}")
 
-            st.divider()
+        st.divider()
 
-            # ------------------------------------------------------------
-            # PROJECT FEASIBILITY
-            # ------------------------------------------------------------
+        # ------------------------------------------------------------
+        # PROJECT FEASIBILITY
+        # ------------------------------------------------------------
 
-            st.subheader("Project Feasibility")
+        st.subheader("Project Feasibility")
 
-            feasibility_col1, feasibility_col2 = st.columns([1, 2])
+        feasibility_col1, feasibility_col2 = st.columns([1, 2])
 
-            with feasibility_col1:
+        with feasibility_col1:
 
-                st.metric(
-                    "Feasibility Score",
-                    f"{feasibility_score}%"
-                )
+            st.metric(
+                "Feasibility Score",
+                f"{feasibility_score}%"
+            )
 
-                if feasibility_score >= 70:
-                    st.success("Good Feasibility")
-                elif feasibility_score >= 40:
-                    st.warning("Moderate Feasibility")
-                else:
-                    st.error("Low Feasibility")
+            if feasibility_score >= 70:
+                st.success("Good Feasibility")
+            elif feasibility_score >= 40:
+                st.warning("Moderate Feasibility")
+            else:
+                st.error("Low Feasibility")
 
-            with feasibility_col2:
+        with feasibility_col2:
 
-                st.write("**Assessment Metrics**")
+            st.write("**Assessment Metrics**")
 
-                st.progress(
-                    team_capability / 100,
-                    text=f"Team Capability — {team_capability}%"
-                )
+            st.progress(
+                team_capability / 100,
+                text=f"Team Capability — {team_capability}%"
+            )
 
-                st.progress(
-                    competitive_advantage / 100,
-                    text=f"Competitive Advantage — {competitive_advantage}%"
-                )
+            st.progress(
+                competitive_advantage / 100,
+                text=f"Competitive Advantage — {competitive_advantage}%"
+            )
 
-                st.progress(
-                    resource_score / 100,
-                    text=f"Resource Availability — {resource_score}%"
-                )
+            st.progress(
+                resource_score / 100,
+                text=f"Resource Availability — {resource_score}%"
+            )
 
-                st.progress(
-                    market_opportunity / 100,
-                    text=f"Market Opportunity — {market_opportunity}%"
-                )
+            st.progress(
+                market_opportunity / 100,
+                text=f"Market Opportunity — {market_opportunity}%"
+            )
 
 
 with tab3:
