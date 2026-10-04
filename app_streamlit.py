@@ -1371,6 +1371,7 @@ with tab4:
 <p style="margin: 0 0 24px 0; color: #6B7280; font-size: 19px; font-family: sans-serif;">Risk analytics dashboard and comprehensive assessment reports</p>
 ''', unsafe_allow_html=True)
 
+    project = st.session_state.get("project_data", {})
     # Grab local variables calculated in earlier tabs if they exist
     mitigation_results = locals().get(
         "mitigation_results",
