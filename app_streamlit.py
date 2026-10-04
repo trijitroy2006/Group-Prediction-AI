@@ -1483,48 +1483,53 @@ with tab4:
         data = st.session_state.get('project_data', {})
         industry = data.get('industry', 'Technology')
         budget = data.get('budget', 100000)
-        report = st.session_state.get('analysis_results')
-        if not report:
+        # Dynamically map from actual AI workflow state
+        rad = st.session_state.get('risk_assessment_data', {})
+        rec_res = st.session_state.get('recommendation_results', {})
+        final_res = st.session_state.get('final_response', {})
 
-            report = {
-                "overall_risk": min(85, max(15, int(100 - (budget / 5000)))),
-                "success_prob": 100 - min(85, max(15, int(100 - (budget / 5000)))),
-                "market_risk": 65 if industry == 'Technology' else 40,
-                "tech_risk": 70 if industry == 'Technology' else 30,
-                "key_findings": [
-                    {"title": "Market Saturation", "desc": "15+ direct competitors in target segment"},
-                    {"title": "Budget Runway", "desc": "Only 8 months remaining at current burn rate"},
-                    {"title": "Team Gaps", "desc": "Missing critical marketing and sales expertise"},
-                    {"title": "Differentiation", "desc": "No clear unique value proposition identified"}
-                ],
-                "risk_assessment": [
-                    {"title": "Market Risk", "desc": "High competition and customer acquisition costs"},
-                    {"title": "Financial Risk", "desc": "Insufficient runway and revenue projections"},
-                    {"title": "Technical Risk", "desc": "Feasible with current team capabilities"}
-                ],
-                "recommendations": [
-                    "Pivot to niche market to reduce competition",
-                    "Secure Series A funding within 90 days",
-                    "Hire marketing lead with industry experience",
-                    "Develop MVP to validate market fit"
-                ],
-                "funding_strategy": "Current burn rate unsustainable. Need bridge round or pivot to revenue-generating model",
-                "tech_advantage": "AI algorithm shows 25% better accuracy than competitors. Leverage for marketing differentiation",
-                "next_steps": [
-                    "Schedule pivot strategy meeting",
-                    "Prepare investor pitch deck",
-                    "Initiate partnership discussions"
-                ]
-            }
+        overall_risk = int(rad.get('risk_score', 50))
+        success_prob = int(rad.get('success_probability', 50))
+        
+        risk_data_arr = rad.get('risk_data', [])
+        market_risk = int(next((r.get('risk_score', 50) for r in risk_data_arr if r.get('risk_category') == 'Market'), 50))
+        tech_risk = int(next((r.get('risk_score', 50) for r in risk_data_arr if r.get('risk_category') == 'Technical'), 50))
+        
+        # Recommendations
+        recs = []
+        if isinstance(rec_res.get('recommendations'), list):
+            recs = [r.get('action', r.get('title', '')) for r in rec_res['recommendations']]
+        
+        # Key Findings
+        kf = [
+            {"title": "Overall Feasibility", "desc": f"Feasibility Score is {rad.get('feasibility_score', 0)}%"},
+            {"title": "Risk Status", "desc": rad.get('risk_status', 'Unknown')}
+        ]
+        
+        # Risk Assessment Details
+        ra = [{"title": r.get('risk_category', 'Risk'), "desc": r.get('risk_description', '')} for r in risk_data_arr]
+        
+        # Next Steps
+        ns = []
+        if final_res.get("short_term_action_plan"):
+            ns = [a.get("action", "") for a in final_res.get("short_term_action_plan", [])]
+        elif rec_res.get("short_term_action_plan"):
+            ns = [a.get("action", "") for a in rec_res.get("short_term_action_plan", [])]
+        else:
+            ns = recs[:3]
 
-        overall_risk = report.get('overall_risk', 50)
-        success_prob = report.get('success_prob', 50)
-        market_risk = report.get('market_risk', 50)
-        tech_risk = report.get('tech_risk', 50)
-
-        kf = report.get('key_findings', [])
-        ra = report.get('risk_assessment', [])
-        recs = report.get('recommendations', [])
+        report = {
+            "overall_risk": overall_risk,
+            "success_prob": success_prob,
+            "market_risk": market_risk,
+            "tech_risk": tech_risk,
+            "key_findings": kf,
+            "risk_assessment": ra,
+            "recommendations": recs,
+            "funding_strategy": final_res.get("project_summary", {}).get("target_market", "Focus on core market penetration and user acquisition."),
+            "tech_advantage": final_res.get("project_summary", {}).get("business_model", "Leverage existing infrastructure for rapid scaling."),
+            "next_steps": ns
+        }
 
         def safe_get(lst, idx, key=None):
             if idx < len(lst):
@@ -1586,27 +1591,23 @@ with tab4:
             with header_col1:
                 st.markdown('<div style="font-weight: 600; color: #374151; font-size: 18px; margin-bottom: 12px; margin-top: 5px; font-family: sans-serif;">Assessment Report</div>', unsafe_allow_html=True)
 
-            report_markdown = f"""# Prediction AI - Risk Assessment Report
-    **Project:** {data.get('startup_name', 'Unknown')}
-    **Industry:** {industry}
+                kf_md = "\n".join([f"- {item.get('title', '')}: {item.get('desc', '')}" for item in kf])
+                ra_md = "\n".join([f"- {item.get('title', '')}: {item.get('desc', '')}" for item in ra])
+                recs_md = "\n".join([f"{idx+1}. {item}" for idx, item in enumerate(recs)])
+        
+                report_markdown = f"""# Prediction AI - Risk Assessment Report
+**Project:** {data.get('startup_name', 'Unknown')}
+**Industry:** {industry}
 
-    ## Key Findings
-    - Market saturation: 15+ direct competitors in target segment
-    - Budget runway: Only 8 months remaining at current burn rate
-    - Team gaps: Missing critical marketing and sales expertise
-    - Differentiation: No clear unique value proposition identified
+## Key Findings
+{kf_md}
 
-    ## Risk Assessment
-    - Market Risk ({market_risk}%): High competition and customer acquisition costs
-    - Financial Risk (72%): Insufficient runway and revenue projections
-    - Technical Risk ({tech_risk}%): Feasible with current team capabilities
+## Risk Assessment
+{ra_md}
 
-    ## Recommendations
-    1. Pivot to niche market to reduce competition
-    2. Secure Series A funding within 90 days
-    3. Hire marketing lead with industry experience
-    4. Develop MVP to validate market fit
-    """
+## Recommendations
+{recs_md}
+"""
             with header_col2:
                 st.download_button(label="📥 Export", data=report_markdown, file_name="risk_assessment_report.md", mime="text/markdown", use_container_width=True)
             with header_col3:
