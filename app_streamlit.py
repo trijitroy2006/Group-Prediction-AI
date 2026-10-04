@@ -553,9 +553,9 @@ with tab2:
             feasibility_score
         )
 
-            # ============================================================
-            # M3 - IMPROVEMENT PLAN
-            # ============================================================
+        # ============================================================
+        # M3 - IMPROVEMENT PLAN
+        # ============================================================
 
         improvement_results = generate_improvements(
             data,
@@ -567,6 +567,7 @@ with tab2:
         )
 
         project_id = st.session_state.get("project_id")
+
         if project_id and not st.session_state.get("assessment_saved", False):
             try:
                 database.save_assessment(
@@ -576,10 +577,16 @@ with tab2:
                     risk_status=risk_status,
                     success_probability=success_probability,
                     recommendations=recommendation_results["recommendations"],
+                    mitigations=mitigation_results,
+                    improvements=improvement_results,
                 )
+
                 st.session_state["assessment_saved"] = True
+
             except Exception as error:
-                print(f"Could not save the assessment to the database: {error}")
+                print(
+                    f"Could not save the assessment to the database: {error}"
+                )
 
         # Format SWOT bullets as HTML dots
         def format_swot(items):
