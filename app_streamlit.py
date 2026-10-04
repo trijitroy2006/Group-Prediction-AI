@@ -444,352 +444,355 @@ with tab2:
 <p style="margin: 4px 0 24px 0; color: #6B7280; font-size: 19px; font-family: sans-serif;">AI-powered risk scoring and strategic evaluation</p>
 """, unsafe_allow_html=True)
 
-    data = st.session_state.get('project_data', {})
+    if not st.session_state.get('has_analyzed', False):
+        st.info("💡 Please enter project details and click 'Analyze Project' to view Risk Assessment.")
+    else:
+        data = st.session_state.get('project_data', {})
 
 
-    st.subheader("Risk Assessment Inputs")
+        st.subheader("Risk Assessment Inputs")
 
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
 
-    with col1:
-        market_competition = st.selectbox("Market Competition", ["Low", "Medium", "High"])
-        team_expertise = st.selectbox("Team Expertise", ["Low", "Medium", "High"])
-        resource_availability = st.selectbox("Resource Availability", ["Limited", "Moderate", "Good"])
+        with col1:
+            market_competition = st.selectbox("Market Competition", ["Low", "Medium", "High"])
+            team_expertise = st.selectbox("Team Expertise", ["Low", "Medium", "High"])
+            resource_availability = st.selectbox("Resource Availability", ["Limited", "Moderate", "Good"])
 
-    with col2:
-        innovation_level = st.selectbox("Innovation Level", ["Low", "Medium", "High"])
-        market_research = st.selectbox("Market Research Quality", ["Limited", "Moderate", "Strong"])
+        with col2:
+            innovation_level = st.selectbox("Innovation Level", ["Low", "Medium", "High"])
+            market_research = st.selectbox("Market Research Quality", ["Limited", "Moderate", "Strong"])
 
-    st.subheader("Project Feasibility Inputs")
+        st.subheader("Project Feasibility Inputs")
 
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
 
-    with col1:
-        market_opportunity = st.slider("Market Opportunity Score", 0, 100, 50)
-        team_capability = st.slider("Team Capability Score", 0, 100, 50)
+        with col1:
+            market_opportunity = st.slider("Market Opportunity Score", 0, 100, 50)
+            team_capability = st.slider("Team Capability Score", 0, 100, 50)
 
-    with col2:
-        competitive_advantage = st.slider("Competitive Advantage Score", 0, 100, 50)
-        resource_score = st.slider("Resource Availability Score", 0, 100, 50)
+        with col2:
+            competitive_advantage = st.slider("Competitive Advantage Score", 0, 100, 50)
+            resource_score = st.slider("Resource Availability Score", 0, 100, 50)
 
 
 
-    # Empty State Handling
-    if not (st.session_state.get('has_analyzed', False) or 'risk_assessment_data' in st.session_state):
-        st.info("💡 Complete project details on the Project Input tab and click 'Analyze Project', or click 'Evaluate Risk' below to generate risk insights.")
-        if st.button("Evaluate Risk"):
-            st.session_state['has_analyzed'] = True
-            st.rerun()
+        # Empty State Handling
+        if not (st.session_state.get('has_analyzed', False) or 'risk_assessment_data' in st.session_state):
+            st.info("💡 Complete project details on the Project Input tab and click 'Analyze Project', or click 'Evaluate Risk' below to generate risk insights.")
+            if st.button("Evaluate Risk"):
+                st.session_state['has_analyzed'] = True
+                st.rerun()
 
-    if st.session_state.get('has_analyzed', False) or 'risk_assessment_data' in st.session_state:
-        from risk_engine import calculate_risk, get_risk_status, calculate_success_probability
-#         from mitigation_engine import generate_mitigation
-#         from improvement_engine import generate_improvements
-        from swot_analysis import generate_swot
-        from feasibility import calculate_feasibility
-        import market_analysis
-        import database
-        
-        def calculate_risk_and_swot(mc, te, ra, il, mr, mo, tc, ca, rs):
-            r_score = calculate_risk(mc, te, ra, il, mr)
-            r_status = get_risk_status(r_score)
-            s_prob = calculate_success_probability(r_score)
-            
-            r_data = [
-                {
-                    "risk_category": "Market",
-                    "risk_score": 80 if mc == "High" else 50,
-                    "risk_description": "High competitor density",
-                    "priority_level": "High" if mc == "High" else "Medium"
-                },
-                {
-                    "risk_category": "Financial",
-                    "risk_score": 75 if data.get("budget", 0) < 50000 else 45,
-                    "risk_description": "Budget constraints",
-                    "priority_level": "High" if data.get("budget", 0) < 50000 else "Medium"
-                },
-                {
-                    "risk_category": "Technical",
-                    "risk_score": 80 if te == "Low" else 40,
-                    "risk_description": "Limited technical expertise",
-                    "priority_level": "High" if te == "Low" else "Medium"
+        if st.session_state.get('has_analyzed', False) or 'risk_assessment_data' in st.session_state:
+            from risk_engine import calculate_risk, get_risk_status, calculate_success_probability
+    #         from mitigation_engine import generate_mitigation
+    #         from improvement_engine import generate_improvements
+            from swot_analysis import generate_swot
+            from feasibility import calculate_feasibility
+            import market_analysis
+            import database
+
+            def calculate_risk_and_swot(mc, te, ra, il, mr, mo, tc, ca, rs):
+                r_score = calculate_risk(mc, te, ra, il, mr)
+                r_status = get_risk_status(r_score)
+                s_prob = calculate_success_probability(r_score)
+
+                r_data = [
+                    {
+                        "risk_category": "Market",
+                        "risk_score": 80 if mc == "High" else 50,
+                        "risk_description": "High competitor density",
+                        "priority_level": "High" if mc == "High" else "Medium"
+                    },
+                    {
+                        "risk_category": "Financial",
+                        "risk_score": 75 if data.get("budget", 0) < 50000 else 45,
+                        "risk_description": "Budget constraints",
+                        "priority_level": "High" if data.get("budget", 0) < 50000 else "Medium"
+                    },
+                    {
+                        "risk_category": "Technical",
+                        "risk_score": 80 if te == "Low" else 40,
+                        "risk_description": "Limited technical expertise",
+                        "priority_level": "High" if te == "Low" else "Medium"
+                    }
+                ]
+
+                sw = generate_swot(te, il, mc, ra, mr)
+                f_score = calculate_feasibility(mo, tc, ca, rs)
+
+                return {
+                    'risk_score': r_score,
+                    'risk_status': r_status,
+                    'success_probability': s_prob,
+                    'risk_data': r_data,
+                    'swot': sw,
+                    'feasibility_score': f_score
                 }
-            ]
-            
-            sw = generate_swot(te, il, mc, ra, mr)
-            f_score = calculate_feasibility(mo, tc, ca, rs)
-            
-            return {
-                'risk_score': r_score,
-                'risk_status': r_status,
-                'success_probability': s_prob,
-                'risk_data': r_data,
-                'swot': sw,
-                'feasibility_score': f_score
+
+            # Update state dynamically with current inputs
+            st.session_state['risk_assessment_data'] = calculate_risk_and_swot(
+                market_competition, team_expertise, resource_availability, 
+                innovation_level, market_research, 
+                market_opportunity, team_capability, 
+                competitive_advantage, resource_score
+            )
+
+            # Read dynamically from session state
+            results = st.session_state['risk_assessment_data']
+            risk_score = results['risk_score']
+            risk_status = results['risk_status']
+            success_probability = results['success_probability']
+            risk_data = results['risk_data']
+            swot = results['swot']
+            feasibility_score = results['feasibility_score']
+
+            mitigation_results = generate_mitigation(risk_data)
+            market_data_for_improvements = market_analysis.get_market_data(
+                data.get("industry", "Technology"),
+                data.get("target_market", ""),
+                data.get("budget", 0),
+            )
+
+            from swot_analysis import generate_swot
+            swot = generate_swot(team_expertise, innovation_level, market_competition, resource_availability, market_research)
+
+            from feasibility import calculate_feasibility
+            feasibility_score = calculate_feasibility(market_opportunity, team_capability, competitive_advantage, resource_score)
+
+            risk_input_data = {
+                "market_competition": market_competition,
+                "team_expertise": team_expertise,
+                "resource_availability": resource_availability,
+                "innovation_level": innovation_level,
+                "market_research": market_research,
+                "risk_score": risk_score
             }
-            
-        # Update state dynamically with current inputs
-        st.session_state['risk_assessment_data'] = calculate_risk_and_swot(
-            market_competition, team_expertise, resource_availability, 
-            innovation_level, market_research, 
-            market_opportunity, team_capability, 
-            competitive_advantage, resource_score
-        )
-        
-        # Read dynamically from session state
-        results = st.session_state['risk_assessment_data']
-        risk_score = results['risk_score']
-        risk_status = results['risk_status']
-        success_probability = results['success_probability']
-        risk_data = results['risk_data']
-        swot = results['swot']
-        feasibility_score = results['feasibility_score']
 
-        mitigation_results = generate_mitigation(risk_data)
-        market_data_for_improvements = market_analysis.get_market_data(
-            data.get("industry", "Technology"),
-            data.get("target_market", ""),
-            data.get("budget", 0),
-        )
+                # ============================================================
+                # M3 - STRATEGIC RECOMMENDATIONS
+                # ============================================================
 
-        from swot_analysis import generate_swot
-        swot = generate_swot(team_expertise, innovation_level, market_competition, resource_availability, market_research)
+            recommendation_results = generate_recommendations(
+                data,
+                risk_input_data,
+                swot,
+                feasibility_score
+            )
 
-        from feasibility import calculate_feasibility
-        feasibility_score = calculate_feasibility(market_opportunity, team_capability, competitive_advantage, resource_score)
+                # ============================================================
+                # M3 - IMPROVEMENT PLAN
+                # ============================================================
 
-        risk_input_data = {
-            "market_competition": market_competition,
-            "team_expertise": team_expertise,
-            "resource_availability": resource_availability,
-            "innovation_level": innovation_level,
-            "market_research": market_research,
-            "risk_score": risk_score
-        }
+            improvement_results = generate_improvements(
+                data,
+                risk_input_data,
+                swot,
+                feasibility_score,
+                market_data=market_data_for_improvements,
+                mitigation_results=mitigation_results
+            )
 
-            # ============================================================
-            # M3 - STRATEGIC RECOMMENDATIONS
-            # ============================================================
+            project_id = st.session_state.get("project_id")
+            if project_id and not st.session_state.get("assessment_saved", False):
+                try:
+                    database.save_assessment(
+                        project_id=project_id,
+                        swot_data=swot,
+                        risk_score=risk_score,
+                        risk_status=risk_status,
+                        success_probability=success_probability,
+                        recommendations=recommendation_results["recommendations"],
+                    )
+                    st.session_state["assessment_saved"] = True
+                except Exception as error:
+                    print(f"Could not save the assessment to the database: {error}")
 
-        recommendation_results = generate_recommendations(
-            data,
-            risk_input_data,
-            swot,
-            feasibility_score
-        )
+            # Format SWOT bullets as HTML dots
+            def format_swot(items):
+                return "".join([f'<div style="margin-bottom:4px;">• {item}</div>' for item in items])
+                st.markdown("<br>", unsafe_allow_html=True)
 
             # ============================================================
-            # M3 - IMPROVEMENT PLAN
+            # M2 RESULTS DASHBOARD
             # ============================================================
 
-        improvement_results = generate_improvements(
-            data,
-            risk_input_data,
-            swot,
-            feasibility_score,
-            market_data=market_data_for_improvements,
-            mitigation_results=mitigation_results
-        )
+            st.divider()
+            st.subheader("Risk Assessment Results")
 
-        project_id = st.session_state.get("project_id")
-        if project_id and not st.session_state.get("assessment_saved", False):
-            try:
-                database.save_assessment(
-                    project_id=project_id,
-                    swot_data=swot,
-                    risk_score=risk_score,
-                    risk_status=risk_status,
-                    success_probability=success_probability,
-                    recommendations=recommendation_results["recommendations"],
+            # ------------------------------------------------------------
+            # TOP SUMMARY
+            # ------------------------------------------------------------
+
+            summary_col1, summary_col2, summary_col3 = st.columns(3)
+
+            with summary_col1:
+                st.metric(
+                    "Overall Risk Score",
+                    f"{risk_score}/100",
+                    risk_status
                 )
-                st.session_state["assessment_saved"] = True
-            except Exception as error:
-                print(f"Could not save the assessment to the database: {error}")
 
-        # Format SWOT bullets as HTML dots
-        def format_swot(items):
-            return "".join([f'<div style="margin-bottom:4px;">• {item}</div>' for item in items])
-            st.markdown("<br>", unsafe_allow_html=True)
+            with summary_col2:
+                st.metric(
+                    "Success Probability",
+                    f"{success_probability}%"
+                )
 
-        # ============================================================
-        # M2 RESULTS DASHBOARD
-        # ============================================================
+            with summary_col3:
+                st.metric(
+                    "Feasibility Score",
+                    f"{feasibility_score}%"
+                )
 
-        st.divider()
-        st.subheader("Risk Assessment Results")
+            st.divider()
 
-        # ------------------------------------------------------------
-        # TOP SUMMARY
-        # ------------------------------------------------------------
+            # ------------------------------------------------------------
+            # MAIN RESULTS AREA
+            # LEFT = KEY RISKS
+            # RIGHT = SWOT
+            # ------------------------------------------------------------
 
-        summary_col1, summary_col2, summary_col3 = st.columns(3)
+            left_col, right_col = st.columns([1, 2])
 
-        with summary_col1:
-            st.metric(
-                "Overall Risk Score",
-                f"{risk_score}/100",
-                risk_status
-            )
+            # ============================================================
+            # LEFT COLUMN - KEY RISK FACTORS
+            # ============================================================
 
-        with summary_col2:
-            st.metric(
-                "Success Probability",
-                f"{success_probability}%"
-            )
+            with left_col:
 
-        with summary_col3:
-            st.metric(
-                "Feasibility Score",
-                f"{feasibility_score}%"
-            )
+                st.subheader("Key Risk Factors")
 
-        st.divider()
+                st.markdown(
+                    f"""
+                    **👥 Team Expertise**
 
-        # ------------------------------------------------------------
-        # MAIN RESULTS AREA
-        # LEFT = KEY RISKS
-        # RIGHT = SWOT
-        # ------------------------------------------------------------
+                    {team_expertise} technical experience
+                    """
+                )
 
-        left_col, right_col = st.columns([1, 2])
+                st.markdown(
+                    f"""
+                    **💡 Innovation Level**
 
-        # ============================================================
-        # LEFT COLUMN - KEY RISK FACTORS
-        # ============================================================
+                    {innovation_level} innovation potential
+                    """
+                )
 
-        with left_col:
+                st.markdown(
+                    f"""
+                    **📊 Market Competition**
 
-            st.subheader("Key Risk Factors")
+                    {market_competition} competition
+                    """
+                )
 
-            st.markdown(
-                f"""
-                **👥 Team Expertise**
+                st.markdown(
+                    f"""
+                    **📦 Resource Availability**
 
-                {team_expertise} technical experience
-                """
-            )
+                    {resource_availability}
+                    """
+                )
 
-            st.markdown(
-                f"""
-                **💡 Innovation Level**
+                st.markdown(
+                    f"""
+                    **🔎 Market Research**
 
-                {innovation_level} innovation potential
-                """
-            )
+                    {market_research}
+                    """
+                )
 
-            st.markdown(
-                f"""
-                **📊 Market Competition**
+                # Risk status card
+                if risk_status == "HIGH RISK":
+                    st.error(f"⚠️ **{risk_status}**")
+                elif risk_status == "MEDIUM RISK":
+                    st.warning(f"⚠️ **{risk_status}**")
+                else:
+                    st.success(f"✓ **{risk_status}**")
 
-                {market_competition} competition
-                """
-            )
+            # ============================================================
+            # RIGHT COLUMN - SWOT
+            # ============================================================
 
-            st.markdown(
-                f"""
-                **📦 Resource Availability**
+            with right_col:
 
-                {resource_availability}
-                """
-            )
+                st.subheader("SWOT Analysis")
 
-            st.markdown(
-                f"""
-                **🔎 Market Research**
+                swot_col1, swot_col2 = st.columns(2)
 
-                {market_research}
-                """
-            )
+                with swot_col1:
 
-            # Risk status card
-            if risk_status == "HIGH RISK":
-                st.error(f"⚠️ **{risk_status}**")
-            elif risk_status == "MEDIUM RISK":
-                st.warning(f"⚠️ **{risk_status}**")
-            else:
-                st.success(f"✓ **{risk_status}**")
+                    st.success("### 💪 Strengths")
 
-        # ============================================================
-        # RIGHT COLUMN - SWOT
-        # ============================================================
+                    for item in swot["Strengths"]:
+                        st.markdown(f"- {item}")
 
-        with right_col:
+                    st.info("### 🚀 Opportunities")
 
-            st.subheader("SWOT Analysis")
+                    for item in swot["Opportunities"]:
+                        st.markdown(f"- {item}")
 
-            swot_col1, swot_col2 = st.columns(2)
+                with swot_col2:
 
-            with swot_col1:
+                    st.error("### ⚠️ Weaknesses")
 
-                st.success("### 💪 Strengths")
+                    for item in swot["Weaknesses"]:
+                        st.markdown(f"- {item}")
 
-                for item in swot["Strengths"]:
-                    st.markdown(f"- {item}")
+                    st.warning("### 🔥 Threats")
 
-                st.info("### 🚀 Opportunities")
+                    for item in swot["Threats"]:
+                        st.markdown(f"- {item}")
 
-                for item in swot["Opportunities"]:
-                    st.markdown(f"- {item}")
+            st.divider()
 
-            with swot_col2:
+            # ------------------------------------------------------------
+            # PROJECT FEASIBILITY
+            # ------------------------------------------------------------
 
-                st.error("### ⚠️ Weaknesses")
+            st.subheader("Project Feasibility")
 
-                for item in swot["Weaknesses"]:
-                    st.markdown(f"- {item}")
+            feasibility_col1, feasibility_col2 = st.columns([1, 2])
 
-                st.warning("### 🔥 Threats")
+            with feasibility_col1:
 
-                for item in swot["Threats"]:
-                    st.markdown(f"- {item}")
+                st.metric(
+                    "Feasibility Score",
+                    f"{feasibility_score}%"
+                )
 
-        st.divider()
+                if feasibility_score >= 70:
+                    st.success("Good Feasibility")
+                elif feasibility_score >= 40:
+                    st.warning("Moderate Feasibility")
+                else:
+                    st.error("Low Feasibility")
 
-        # ------------------------------------------------------------
-        # PROJECT FEASIBILITY
-        # ------------------------------------------------------------
+            with feasibility_col2:
 
-        st.subheader("Project Feasibility")
+                st.write("**Assessment Metrics**")
 
-        feasibility_col1, feasibility_col2 = st.columns([1, 2])
+                st.progress(
+                    team_capability / 100,
+                    text=f"Team Capability — {team_capability}%"
+                )
 
-        with feasibility_col1:
+                st.progress(
+                    competitive_advantage / 100,
+                    text=f"Competitive Advantage — {competitive_advantage}%"
+                )
 
-            st.metric(
-                "Feasibility Score",
-                f"{feasibility_score}%"
-            )
+                st.progress(
+                    resource_score / 100,
+                    text=f"Resource Availability — {resource_score}%"
+                )
 
-            if feasibility_score >= 70:
-                st.success("Good Feasibility")
-            elif feasibility_score >= 40:
-                st.warning("Moderate Feasibility")
-            else:
-                st.error("Low Feasibility")
-
-        with feasibility_col2:
-
-            st.write("**Assessment Metrics**")
-
-            st.progress(
-                team_capability / 100,
-                text=f"Team Capability — {team_capability}%"
-            )
-
-            st.progress(
-                competitive_advantage / 100,
-                text=f"Competitive Advantage — {competitive_advantage}%"
-            )
-
-            st.progress(
-                resource_score / 100,
-                text=f"Resource Availability — {resource_score}%"
-            )
-
-            st.progress(
-                market_opportunity / 100,
-                text=f"Market Opportunity — {market_opportunity}%"
-            )
+                st.progress(
+                    market_opportunity / 100,
+                    text=f"Market Opportunity — {market_opportunity}%"
+                )
 
 
 with tab3:
@@ -1401,94 +1404,94 @@ with tab4:
 <p style="margin: 0 0 24px 0; color: #6B7280; font-size: 19px; font-family: sans-serif;">Risk analytics dashboard and comprehensive assessment reports</p>
 ''', unsafe_allow_html=True)
 
-    project = st.session_state.get("project_data", {})
-    # Grab local variables calculated in earlier tabs if they exist
-    mitigation_results = locals().get(
-        "mitigation_results",
-        st.session_state.get("m3_workflow_result", {}).get("mitigation_results", [])
-    )
-    improvement_results = locals().get(
-        "improvement_results",
-        st.session_state.get("m3_workflow_result", {}).get("improvement_results", [])
-    )
-    recommendations = locals().get(
-        "recommendation_results",
-        st.session_state.get("m3_workflow_result", {}).get("recommendations", {})
-    )
-    final_response = locals().get(
-        "final_response",
-        st.session_state.get("m3_workflow_result", {}).get("final_response", {})
-    )
-
-    # ========================================================
-    # PROJECT OVERVIEW
-    # ========================================================
-
-    st.subheader("Project Overview")
-
-    overview_col1, overview_col2, overview_col3 = st.columns(3)
-
-    with overview_col1:
-        st.markdown(
-            f"""
-            **Project**
-
-            {project.get("startup_name", "N/A")}
-
-            **Industry**
-
-            {project.get("industry", "N/A")}
-            """
-        )
-
-    with overview_col2:
-        st.markdown(
-            f"""
-            **Business Model**
-
-            {project.get("business_model", "N/A")}
-
-            **Target Market**
-
-            {project.get("target_market", "N/A")}
-            """
-        )
-
-    with overview_col3:
-        budget = project.get("budget", 0)
-
-        try:
-            budget_display = f"${float(budget):,.0f}"
-        except (TypeError, ValueError):
-            budget_display = str(budget)
-
-        st.markdown(
-            f"""
-            **Budget**
-
-            {budget_display}
-
-            **Project Status**
-
-            {"Analysis Complete" if st.session_state.get("has_analyzed")
-            else "Pending Analysis"}
-            """
-        )
-
-    description = project.get(
-        "project_description",
-        ""
-    )
-
-    if description:
-        st.markdown("**Project Description**")
-        st.info(description)
-
-    st.divider()
-
     if not st.session_state.get('has_analyzed', False):
         st.info("💡 Please enter project details and click 'Analyze Project' to view the Dashboard.")
     else:
+        project = st.session_state.get("project_data", {})
+        # Grab local variables calculated in earlier tabs if they exist
+        mitigation_results = locals().get(
+            "mitigation_results",
+            st.session_state.get("m3_workflow_result", {}).get("mitigation_results", [])
+        )
+        improvement_results = locals().get(
+            "improvement_results",
+            st.session_state.get("m3_workflow_result", {}).get("improvement_results", [])
+        )
+        recommendations = locals().get(
+            "recommendation_results",
+            st.session_state.get("m3_workflow_result", {}).get("recommendations", {})
+        )
+        final_response = locals().get(
+            "final_response",
+            st.session_state.get("m3_workflow_result", {}).get("final_response", {})
+        )
+
+        # ========================================================
+        # PROJECT OVERVIEW
+        # ========================================================
+
+        st.subheader("Project Overview")
+
+        overview_col1, overview_col2, overview_col3 = st.columns(3)
+
+        with overview_col1:
+            st.markdown(
+                f"""
+                **Project**
+
+                {project.get("startup_name", "N/A")}
+
+                **Industry**
+
+                {project.get("industry", "N/A")}
+                """
+            )
+
+        with overview_col2:
+            st.markdown(
+                f"""
+                **Business Model**
+
+                {project.get("business_model", "N/A")}
+
+                **Target Market**
+
+                {project.get("target_market", "N/A")}
+                """
+            )
+
+        with overview_col3:
+            budget = project.get("budget", 0)
+
+            try:
+                budget_display = f"${float(budget):,.0f}"
+            except (TypeError, ValueError):
+                budget_display = str(budget)
+
+            st.markdown(
+                f"""
+                **Budget**
+
+                {budget_display}
+
+                **Project Status**
+
+                {"Analysis Complete" if st.session_state.get("has_analyzed")
+                else "Pending Analysis"}
+                """
+            )
+
+        description = project.get(
+            "project_description",
+            ""
+        )
+
+        if description:
+            st.markdown("**Project Description**")
+            st.info(description)
+
+        st.divider()
+
         data = st.session_state.get('project_data', {})
 
         data = st.session_state.get('project_data', {})
