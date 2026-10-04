@@ -161,17 +161,18 @@ def analyze_risks(state: M3WorkflowState):
 
 
 def generate_recommendation_node(state: M3WorkflowState):
-    """Node 3: Generate strategic recommendations."""
+    """Node 3: Generate strategic recommendations using Gemini."""
 
-    recommendations = generate_recommendations(
-        state["project_data"],
-        state["risk_input_data"],
-        state["swot"],
-        state["feasibility_score"]
+    llm_recommendations = generate_llm_recommendations(
+        project_data=state["project_data"],
+        risk_input_data=state["risk_input_data"],
+        swot=state["swot"],
+        feasibility_score=state["feasibility_score"],
+        market_data=state.get("market_data", {})
     )
 
     return {
-        "recommendations": recommendations
+        "recommendations": llm_recommendations
     }
 
 
@@ -1394,19 +1395,19 @@ with tab4:
     # Grab local variables calculated in earlier tabs if they exist
     mitigation_results = locals().get(
         "mitigation_results",
-        st.session_state.get("mitigation_results", [])
+        st.session_state.get("m3_workflow_result", {}).get("mitigation_results", [])
     )
     improvement_results = locals().get(
         "improvement_results",
-        st.session_state.get("improvement_results", [])
+        st.session_state.get("m3_workflow_result", {}).get("improvement_results", [])
     )
     recommendations = locals().get(
         "recommendation_results",
-        st.session_state.get("recommendation_results", {})
+        st.session_state.get("m3_workflow_result", {}).get("recommendations", {})
     )
     final_response = locals().get(
         "final_response",
-        st.session_state.get("final_response", {})
+        st.session_state.get("m3_workflow_result", {}).get("final_response", {})
     )
 
     # ========================================================
@@ -1485,8 +1486,9 @@ with tab4:
         budget = data.get('budget', 100000)
         # Dynamically map from actual AI workflow state
         rad = st.session_state.get('risk_assessment_data', {})
-        rec_res = st.session_state.get('recommendation_results', {})
-        final_res = st.session_state.get('final_response', {})
+        workflow_result = st.session_state.get('m3_workflow_result', {})
+        rec_res = workflow_result.get('recommendations', {})
+        final_res = workflow_result.get('final_response', {})
 
         overall_risk = int(rad.get('risk_score', 50))
         success_prob = int(rad.get('success_probability', 50))
@@ -1497,7 +1499,9 @@ with tab4:
         
         # Recommendations
         recs = []
-        if isinstance(rec_res.get('recommendations'), list):
+        if isinstance(rec_res, list):
+            recs = [r.get('action', r.get('title', '')) for r in rec_res]
+        elif isinstance(rec_res, dict) and isinstance(rec_res.get('recommendations'), list):
             recs = [r.get('action', r.get('title', '')) for r in rec_res['recommendations']]
         
         # Key Findings
@@ -1511,11 +1515,12 @@ with tab4:
         
         # Next Steps
         ns = []
-        if final_res.get("short_term_action_plan"):
-            ns = [a.get("action", "") for a in final_res.get("short_term_action_plan", [])]
-        elif rec_res.get("short_term_action_plan"):
-            ns = [a.get("action", "") for a in rec_res.get("short_term_action_plan", [])]
+        if isinstance(final_res, dict) and final_res.get("short_term_action_plan"):
+            ns = [a.get("action", "") if isinstance(a, dict) else a for a in final_res.get("short_term_action_plan", [])]
+        elif isinstance(rec_res, dict) and rec_res.get("short_term_action_plan"):
+            ns = [a for a in rec_res.get("short_term_action_plan", [])]
         else:
+            ns = recs[:3]
             ns = recs[:3]
 
         report = {
