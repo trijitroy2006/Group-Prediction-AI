@@ -7,6 +7,8 @@ import database
 
 
 from recommendation_engine import generate_recommendations
+from mitigation_engine import generate_mitigation
+from improvement_engine import generate_improvements
 from llm_service import generate_llm_recommendations, generate_llm_mitigation, generate_llm_improvements
 
 try:
@@ -481,8 +483,8 @@ with tab2:
 
     if st.session_state.get('has_analyzed', False) or 'risk_assessment_data' in st.session_state:
         from risk_engine import calculate_risk, get_risk_status, calculate_success_probability
-        from mitigation_engine import generate_mitigation
-        from improvement_engine import generate_improvements
+#         from mitigation_engine import generate_mitigation
+#         from improvement_engine import generate_improvements
         from swot_analysis import generate_swot
         from feasibility import calculate_feasibility
         import market_analysis
