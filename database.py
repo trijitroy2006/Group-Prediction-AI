@@ -97,16 +97,7 @@ def insert_success_prediction(project_id, success_probability, overall_risk_scor
     conn.close()
     return prediction_id
 
-def save_assessment(
-    project_id,
-    swot_data,
-    risk_score,
-    risk_status,
-    success_probability,
-    recommendations,
-    mitigations,
-    improvements
-):
+def save_assessment(project_id, swot_data, risk_score, risk_status, success_probability, recommendations):
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -116,37 +107,13 @@ def save_assessment(
         opportunities = ", ".join(swot_data.get("Opportunities", [])) or "N/A"
         threats = ", ".join(swot_data.get("Threats", [])) or "N/A"
 
-        # ---------------------------------------------------------
-        # 1. Save SWOT Analysis
-        # ---------------------------------------------------------
         cur.execute('''
-            INSERT INTO swot_analysis (
-                project_id,
-                strengths,
-                weaknesses,
-                opportunities,
-                threats
-            )
+            INSERT INTO swot_analysis (project_id, strengths, weaknesses, opportunities, threats)
             VALUES (?, ?, ?, ?, ?);
-        ''', (
-            project_id,
-            strengths,
-            weaknesses,
-            opportunities,
-            threats
-        ))
+        ''', (project_id, strengths, weaknesses, opportunities, threats))
 
-        # ---------------------------------------------------------
-        # 2. Save Risk Assessment
-        # ---------------------------------------------------------
         cur.execute('''
-            INSERT INTO risk_assessments (
-                project_id,
-                risk_category,
-                risk_score,
-                risk_description,
-                priority_level
-            )
+            INSERT INTO risk_assessments (project_id, risk_category, risk_score, risk_description, priority_level)
             VALUES (?, ?, ?, ?, ?);
         ''', (
             project_id,
@@ -156,133 +123,35 @@ def save_assessment(
             "High" if risk_score > 60 else "Medium",
         ))
 
-        # ---------------------------------------------------------
-        # 3. Save Success Prediction
-        # ---------------------------------------------------------
         cur.execute('''
-            INSERT INTO success_predictions (
-                project_id,
-                success_probability,
-                overall_risk_score
-            )
+            INSERT INTO success_predictions (project_id, success_probability, overall_risk_score)
             VALUES (?, ?, ?);
-        ''', (
-            project_id,
-            success_probability,
-            risk_score
-        ))
+        ''', (project_id, success_probability, risk_score))
 
-        # ---------------------------------------------------------
-        # 4. Save AI Recommendations
-        # ---------------------------------------------------------
         for recommendation in recommendations:
-            steps = recommendation.get("steps") or [
-                recommendation.get("action", "")
-            ]
-
+            steps = recommendation.get("steps") or [recommendation.get("action", "")]
             recommendation_text = " ".join(
-                f"{index}. {step}"
-                for index, step in enumerate(steps, start=1)
+                f"{index}. {step}" for index, step in enumerate(steps, start=1)
             )
-
             cur.execute('''
-                INSERT INTO recommendations (
-                    project_id,
-                    category,
-                    recommendation_text,
-                    problem_risk,
-                    why_it_matters,
-                    recommended_action,
-                    expected_risk_reduction,
-                    priority
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO recommendations (project_id, recommendation_text, risk_mitigation, priority)
+                VALUES (?, ?, ?, ?);
             ''', (
                 project_id,
-                recommendation.get("category", ""),
                 recommendation_text,
-                recommendation.get("problem", ""),
-                recommendation.get("explanation", ""),
-                recommendation.get("action", ""),
                 recommendation.get("risk_reduction", ""),
                 recommendation.get("priority", "Medium"),
             ))
 
-        # ---------------------------------------------------------
-        # 5. Save Mitigation Strategies
-        # ---------------------------------------------------------
-        for mitigation in mitigations:
-            cur.execute('''
-                INSERT INTO mitigation_strategies (
-                    project_id,
-                    risk_name,
-                    category,
-                    description,
-                    impact,
-                    priority,
-                    mitigation_strategy,
-                    preventive_action,
-                    contingency_action
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-            ''', (
-                project_id,
-                mitigation.get("risk", ""),
-                mitigation.get("category", ""),
-                mitigation.get("description", ""),
-                mitigation.get("impact", ""),
-                mitigation.get("priority", "Medium"),
-                mitigation.get("mitigation_strategy", ""),
-                mitigation.get("preventive_action", ""),
-                mitigation.get("contingency_action", ""),
-            ))
-
-        # ---------------------------------------------------------
-        # 6. Save Improvement Plans
-        # ---------------------------------------------------------
-        for improvement in improvements:
-            cur.execute('''
-                INSERT INTO improvement_plans (
-                    project_id,
-                    category,
-                    improvement,
-                    reason,
-                    expected_benefit,
-                    priority
-                )
-                VALUES (?, ?, ?, ?, ?, ?);
-            ''', (
-                project_id,
-                improvement.get("category", ""),
-                improvement.get("title", ""),
-                improvement.get("problem", ""),
-                improvement.get("risk_reduction", ""),
-                improvement.get("priority", "Medium"),
-            ))
-
-        # ---------------------------------------------------------
-        # 7. Save Assessment Report
-        # ---------------------------------------------------------
         cur.execute('''
-            INSERT INTO assessment_reports (
-                project_id,
-                report_path
-            )
+            INSERT INTO assessment_reports (project_id, report_path)
             VALUES (?, ?);
-        ''', (
-            project_id,
-            f"streamlit_assessment_{project_id}"
-        ))
+        ''', (project_id, f"streamlit_assessment_{project_id}"))
 
-        # ---------------------------------------------------------
-        # Commit everything
-        # ---------------------------------------------------------
         conn.commit()
-
     except Exception:
         conn.rollback()
         raise
-
     finally:
         cur.close()
         conn.close()

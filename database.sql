@@ -46,44 +46,13 @@ CREATE TABLE IF NOT EXISTS success_predictions (
 CREATE TABLE IF NOT EXISTS recommendations (
     recommendation_id SERIAL PRIMARY KEY,
     project_id INT REFERENCES projects(id) ON DELETE CASCADE,
-    category VARCHAR(100),
     recommendation_text TEXT,
-    problem_risk TEXT,
-    why_it_matters TEXT,
-    recommended_action TEXT,
-    expected_risk_reduction TEXT,
+    risk_mitigation TEXT,
     priority VARCHAR(50),
     generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 6. Mitigation Table strategy
-CREATE TABLE IF NOT EXISTS mitigation_strategies (
-    mitigation_id SERIAL PRIMARY KEY,
-    project_id INT REFERENCES projects(id) ON DELETE CASCADE,
-    risk_name VARCHAR(255),
-    category VARCHAR(100),
-    description TEXT,
-    impact VARCHAR(50),
-    priority VARCHAR(50),
-    mitigation_strategy TEXT,
-    preventive_action TEXT,
-    contingency_action TEXT,
-    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 7. Improvement Plans Table
-CREATE TABLE IF NOT EXISTS improvement_plans (
-    improvement_id SERIAL PRIMARY KEY,
-    project_id INT REFERENCES projects(id) ON DELETE CASCADE,
-    category VARCHAR(100),
-    improvement TEXT,
-    reason TEXT,
-    expected_benefit TEXT,
-    priority VARCHAR(50),
-    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 8. Assessment Reports Table
+-- 6. Assessment Reports Table
 CREATE TABLE IF NOT EXISTS assessment_reports (
     report_id SERIAL PRIMARY KEY,
     project_id INT REFERENCES projects(id) ON DELETE CASCADE,
