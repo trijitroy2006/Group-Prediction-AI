@@ -2,204 +2,389 @@ import os
 import json
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key) if api_key else None
 
 
-def build_prompt(project_data, risk_data, swot_data, feasibility_score):
-    prompt = f"""
-You are a startup risk advisor. Based on the following project data, generate 3 to 5 actionable recommendations.
+# ============================================================
+# GEMINI CONFIGURATION
+# ============================================================
 
-Project Name: {project_data.get('startup_name', 'Unknown')}
-Industry: {project_data.get('industry', 'Unknown')}
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 
-Risk Factors:
-- Market Competition: {risk_data.get('market_competition', 'Unknown')}
-- Team Expertise: {risk_data.get('team_expertise', 'Unknown')}
-- Resource Availability: {risk_data.get('resource_availability', 'Unknown')}
-- Innovation Level: {risk_data.get('innovation_level', 'Unknown')}
-- Market Research: {risk_data.get('market_research', 'Unknown')}
-- Overall Risk Score: {risk_data.get('risk_score', 'Unknown')}
+_client = None
 
-Feasibility Score: {feasibility_score}
-
-SWOT Summary:
-Strengths: {swot_data.get('strengths', [])}
-Weaknesses: {swot_data.get('weaknesses', [])}
-Opportunities: {swot_data.get('opportunities', [])}
-Threats: {swot_data.get('threats', [])}
-
-Return ONLY valid JSON, no extra text, no markdown formatting, in this exact format:
-[
-  {{
-    "category": "Market",
-    "title": "short title",
-    "priority": "Critical" or "High" or "Medium",
-    "problem": "one line problem statement",
-    "action": "1-2 sentence concrete action",
-    "risk_reduction": "1 sentence on how this action reduces risk"
-  }}
-]
-"""
-    return prompt
-
-
-def generate_llm_recommendations(project_data, risk_data, swot_data, feasibility_score):
-    if client is None:
-        return None
-
-    prompt = build_prompt(project_data, risk_data, swot_data, feasibility_score)
+if GEMINI_API_KEY:
     try:
-        response = client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=prompt
-        )
-        text = response.text.strip()
+        _client = genai.Client(api_key=GEMINI_API_KEY)
+    except Exception:
+        _client = None
 
-        if text.startswith("```"):
-            text = text.strip("`")
-            if text.startswith("json"):
-                text = text[4:]
 
-        recommendations = json.loads(text)
-        return recommendations
+def is_llm_available():
+    """Return True when Gemini is configured and available."""
+    return _client is not None
 
-    except Exception as e:
-        print("LLM recommendation generation failed:", e)
+
+# ============================================================
+# GEMINI JSON GENERATION
+# ============================================================
+
+def _generate_json(prompt, schema):
+    """
+    Send a prompt to Gemini and return structured JSON.
+
+    Returns:
+        dict | None
+    """
+
+    if not _client:
         return None
 
-import os
-import json
-import re
-from dotenv import load_dotenv
-from google import genai
+    try:
+        response = _client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=schema,
+                temperature=0.4,
+            ),
+        )
 
-load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key) if api_key else None
+        if not response.text:
+            return None
 
-def parse_dashboard_markdown(md_text):
-    data = {
-        "overall_risk": 50, "success_prob": 50, "market_risk": 50, 
-        "financial_risk": 50, "tech_risk": 50,
-        "key_findings": [], "risk_assessment": [], "recommendations": [],
-        "funding_strategy": "N/A", "tech_advantage": "N/A", "next_steps": []
-    }
-    m = re.search(r'\*\*Overall Risk Score:\*\*\s*(\d+)', md_text)
-    if m: data["overall_risk"] = int(m.group(1))
-    m = re.search(r'\*\*Success Probability:\*\*\s*(\d+)', md_text)
-    if m: data["success_prob"] = int(m.group(1))
-    m = re.search(r'\*\*Market Risk:\*\*\s*(\d+)', md_text)
-    if m: data["market_risk"] = int(m.group(1))
-    m = re.search(r'\*\*Financial Risk:\*\*\s*(\d+)', md_text)
-    if m: data["financial_risk"] = int(m.group(1))
-    m = re.search(r'\*\*Technical Risk:\*\*\s*(\d+)', md_text)
-    if m: data["tech_risk"] = int(m.group(1))
-    findings_match = re.search(r'### Key Findings \(High Priority\)(.*?)(?=---|###)', md_text, re.DOTALL)
-    if findings_match:
-        items = re.findall(r'-\s*\*\*(.*?)\*\*\s*(.*)', findings_match.group(1))
-        data["key_findings"] = [{"title": k.strip(': '), "desc": v.strip()} for k, v in items]
-    risk_match = re.search(r'### Detailed Risk Assessment(.*)(?=---|###)', md_text, re.DOTALL)
-    if risk_match:
-        items = re.findall(r'-\s*\*\*(.*?)\*\*\s*(.*)', risk_match.group(1))
-        data["risk_assessment"] = [{"title": k.strip(': '), "desc": v.strip()} for k, v in items]
-    rec_match = re.search(r'### Strategic Recommendations \(Action Required\)(.*?)(?=---|###)', md_text, re.DOTALL)
-    if rec_match:
-        items = re.findall(r'\d+\.\s*(.*)', rec_match.group(1))
-        data["recommendations"] = [item.strip() for item in items]
-    insight_match = re.search(r'### Strategic Insights(.*?)(?=---|###)', md_text, re.DOTALL)
-    if insight_match:
-        f_match = re.search(r'\*\*Funding Strategy[^:]*:\*\*\s*(.*)', insight_match.group(1))
-        if f_match: data["funding_strategy"] = f_match.group(1).strip()
-        t_match = re.search(r'\*\*Technical Advantage[^:]*:\*\*\s*(.*)', insight_match.group(1))
-        if t_match: data["tech_advantage"] = t_match.group(1).strip()
-    next_match = re.search(r'### Recommended Next Steps(.*)', md_text, re.DOTALL)
-    if next_match:
-        items = re.findall(r'\d+\.\s*(.*)', next_match.group(1))
-        data["next_steps"] = [item.strip() for item in items]
-    return data
+        return json.loads(response.text)
+
+    except Exception as error:
+        print(f"Gemini API error: {error}")
+        return None
+
+
+# ============================================================
+# PROJECT ANALYSIS
+# ============================================================
 
 def generate_project_analysis(project_data):
-    if client is None:
-        return None
+    """
+    Generate an AI-based high-level analysis of the submitted project.
+
+    This is used during project submission and provides:
+    - project summary
+    - market considerations
+    - competitive considerations
+    - initial risk observations
+    """
+
+    if not is_llm_available():
+        return {
+            "mode": "DEMO",
+            "project_summary": (
+                f"{project_data.get('startup_name', 'Project')} "
+                f"is a {project_data.get('business_model', 'business')} "
+                f"project operating in the "
+                f"{project_data.get('industry', 'technology')} sector."
+            ),
+            "market_observations": [
+                "Validate target customer demand before major investment.",
+                "Assess the size and growth potential of the target market.",
+                "Monitor competitor positioning and differentiation."
+            ],
+            "initial_risk_observations": [
+                "Market acceptance risk",
+                "Competitive risk",
+                "Resource and execution risk"
+            ]
+        }
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "project_summary": {
+                "type": "string"
+            },
+            "market_observations": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "initial_risk_observations": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "project_summary",
+            "market_observations",
+            "initial_risk_observations"
+        ]
+    }
+
     prompt = f"""
-You are an expert Startup & Project Risk Analytics Engine. Your objective is to perform a rigorous, data-driven evaluation of a given project based on the user's input, calculate risk metrics, identify critical bottlenecks, and generate an actionable Executive Assessment Report.
+You are an expert startup and project risk analyst.
 
-### INPUT DATA PROVIDED:
-- Project Name: {project_data.get('startup_name', 'Unknown')}
-- Project Description: {project_data.get('project_description', 'Unknown')}
-- Financial Data (Burn rate, runway, funding): Budget is ${project_data.get('budget', 0)}
-- Market & Competitor Data: Target Market is {project_data.get('target_market', 'Unknown')}, Industry is {project_data.get('industry', 'Unknown')}
-- Business Model: {project_data.get('business_model', 'Unknown')}
+Analyze the following project.
 
-### INSTRUCTIONS:
-Analyze the input data holistically and compute/generate the following sections:
-1. METRICS & RISK SCORES
-2. KEY FINDINGS (High Priority)
-3. DETAILED RISK ASSESSMENT
-4. STRATEGIC RECOMMENDATIONS (Action Required)
-5. STRATEGIC INSIGHTS
-6. RECOMMENDED NEXT STEPS
+PROJECT DATA:
+{json.dumps(project_data, indent=2, default=str)}
 
-### OUTPUT FORMAT:
-Return the assessment strictly structured in the following Markdown format:
+Provide:
+1. A concise project summary.
+2. Important market observations.
+3. Initial risk observations.
 
-## Dashboard & Deployment Assessment Report
-
-### Risk Analytics Summary
-* **Overall Risk Score:** {{OVERALL_RISK_PERCENT}}%
-* **Success Probability:** {{SUCCESS_PROBABILITY_PERCENT}}%
-* **Market Risk:** {{MARKET_RISK_PERCENT}}%
-* **Financial Risk:** {{FINANCIAL_RISK_PERCENT}}%
-* **Technical Risk:** {{TECHNICAL_RISK_PERCENT}}%
-
----
-
-### Key Findings (High Priority)
-- **Market Saturation:** [Summary of market competition and saturation threat]
-- **Budget Runway:** [Current runway estimate and burn rate status]
-- **Team Gaps:** [Key missing skill sets or domain expertise]
-- **Differentiation:** [Unique Value Proposition assessment]
-
----
-
-### Detailed Risk Assessment
-- **Market Risk ({{MARKET_RISK_PERCENT}}%):** [Breakdown of CAC, market size, and adoption barriers]
-- **Financial Risk ({{FINANCIAL_RISK_PERCENT}}%):** [Breakdown of financial runway, cash projections, and capital requirements]
-- **Technical Risk ({{TECHNICAL_RISK_PERCENT}}%):** [Breakdown of tech feasibility and engineering capacity]
-
----
-
-### Strategic Recommendations (Action Required)
-1. [Recommendation 1 - Niche focus / Market strategy]
-2. [Recommendation 2 - Capital / Revenue strategy]
-3. [Recommendation 3 - Team / Talent acquisition strategy]
-4. [Recommendation 4 - MVP / Product validation milestone]
-
----
-
-### Strategic Insights
-* **Funding Strategy (Critical Impact):** [Funding or revenue strategy insight]
-* **Technical Advantage (Medium Impact):** [Core technical differentiator or moat leverage]
-
----
-
-### Recommended Next Steps
-1. [Immediate step 1]
-2. [Immediate step 2]
-3. [Immediate step 3]
+Do not invent specific market statistics or competitor numbers.
+Base the analysis only on the information provided.
 """
-    try:
-        response = client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=prompt
-        )
-        text = response.text.strip()
-        parsed = parse_dashboard_markdown(text)
-        return parsed
-    except Exception as e:
-        print("Dashboard generation failed:", e)
-        return None
 
+    result = _generate_json(prompt, schema)
+
+    if result is None:
+        return {
+            "mode": "DEMO",
+            "project_summary": "AI analysis unavailable.",
+            "market_observations": [],
+            "initial_risk_observations": []
+        }
+
+    result["mode"] = "GEMINI"
+
+    return result
+
+
+# ============================================================
+# M3 STRATEGIC RECOMMENDATIONS
+# ============================================================
+
+def generate_llm_recommendations(
+    project_data,
+    risk_input_data,
+    swot,
+    feasibility_score,
+    market_data=None,
+    risk_data=None,
+    base_recommendations=None
+):
+    """
+    Generate M3 strategic recommendations using Gemini.
+
+    The output structure intentionally matches the existing
+    recommendation/dashboard structure.
+    """
+
+    # --------------------------------------------------------
+    # DEMO MODE
+    # --------------------------------------------------------
+
+    if not is_llm_available():
+
+        if base_recommendations:
+            result = dict(base_recommendations)
+            result["mode"] = "DEMO"
+            return result
+
+        return {
+            "mode": "DEMO",
+            "overall_strategic_recommendation": (
+                "Address the highest-priority risks first, "
+                "validate market demand, strengthen execution "
+                "capability, and control resource allocation."
+            ),
+            "recommendations": [],
+            "short_term_action_plan": [
+                "Validate the target customer problem.",
+                "Review the highest-priority project risks.",
+                "Validate budget and resource assumptions."
+            ],
+            "long_term_action_plan": [
+                "Build sustainable competitive differentiation.",
+                "Scale only after validating product-market fit.",
+                "Establish continuous risk monitoring."
+            ]
+        }
+
+    # --------------------------------------------------------
+    # GEMINI SCHEMA
+    # --------------------------------------------------------
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "overall_strategic_recommendation": {
+                "type": "string"
+            },
+
+            "recommendations": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "title": {
+                            "type": "string"
+                        },
+                        "category": {
+                            "type": "string"
+                        },
+                        "priority": {
+                            "type": "string"
+                        },
+                        "problem": {
+                            "type": "string"
+                        },
+                        "explanation": {
+                            "type": "string"
+                        },
+                        "action": {
+                            "type": "string"
+                        },
+                        "risk_reduction": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "title",
+                        "category",
+                        "priority",
+                        "problem",
+                        "explanation",
+                        "action",
+                        "risk_reduction"
+                    ]
+                }
+            },
+
+            "short_term_action_plan": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+
+            "long_term_action_plan": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": [
+            "overall_strategic_recommendation",
+            "recommendations",
+            "short_term_action_plan",
+            "long_term_action_plan"
+        ]
+    }
+
+    # --------------------------------------------------------
+    # PROMPT
+    # --------------------------------------------------------
+
+    prompt = f"""
+You are the AI Strategic Recommendation Engine for a
+Startup & Project Risk Analyzer.
+
+Your job is to analyze the project and produce practical,
+risk-linked strategic recommendations.
+
+IMPORTANT:
+- Do not invent facts.
+- Use the supplied project information.
+- Recommendations must be directly connected to identified risks.
+- Every recommendation must explain:
+  1. the problem/risk,
+  2. why it matters,
+  3. what should be done,
+  4. how the action reduces risk.
+- Prioritize the most important risks.
+- Be practical and specific.
+- Avoid generic motivational advice.
+- Do not claim certainty about business success.
+
+PROJECT INFORMATION:
+{json.dumps(project_data, indent=2, default=str)}
+
+RISK INPUTS:
+{json.dumps(risk_input_data, indent=2, default=str)}
+
+OVERALL RISK SCORE:
+{json.dumps({
+    "risk_score": risk_input_data.get("risk_score"),
+    "feasibility_score": feasibility_score
+}, indent=2, default=str)}
+
+SWOT:
+{json.dumps(swot, indent=2, default=str)}
+
+MARKET DATA:
+{json.dumps(market_data or {}, indent=2, default=str)}
+
+IDENTIFIED RISKS:
+{json.dumps(risk_data or [], indent=2, default=str)}
+
+EXISTING BASELINE RECOMMENDATIONS:
+{json.dumps(base_recommendations or {}, indent=2, default=str)}
+
+Generate:
+
+A. Overall Strategic Recommendation
+
+B. Strategic Recommendations
+
+Each recommendation must contain:
+- title
+- category
+- priority
+- problem
+- explanation
+- action
+- risk_reduction
+
+Categories may include:
+- Risk
+- Market
+- Technical
+- Financial
+- Operational
+- Product
+- Marketing
+
+C. Short-Term Action Plan
+
+D. Long-Term Action Plan
+
+Return ONLY the requested structured JSON.
+"""
+
+    result = _generate_json(prompt, schema)
+
+    # --------------------------------------------------------
+    # FALLBACK
+    # --------------------------------------------------------
+
+    if result is None:
+
+        if base_recommendations:
+            fallback = dict(base_recommendations)
+            fallback["mode"] = "FALLBACK"
+            return fallback
+
+        return {
+            "mode": "FALLBACK",
+            "overall_strategic_recommendation": (
+                "Review the highest-priority risks and implement "
+                "targeted mitigation actions before scaling."
+            ),
+            "recommendations": [],
+            "short_term_action_plan": [],
+            "long_term_action_plan": []
+        }
+
+    result["mode"] = "GEMINI"
+
+    return result

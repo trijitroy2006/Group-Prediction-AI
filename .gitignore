@@ -4,4 +4,4 @@ __pycache__/
 *.pyc
 .env
 .vscode/
-.env.*
+ml_project.db

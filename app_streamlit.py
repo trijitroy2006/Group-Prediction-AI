@@ -161,17 +161,30 @@ def analyze_risks(state: M3WorkflowState):
 
 
 def generate_recommendation_node(state: M3WorkflowState):
-    """Node 3: Generate strategic recommendations."""
+    """Node 3: Generate strategic recommendations using Gemini."""
 
-    recommendations = generate_recommendations(
+    # First generate the deterministic baseline.
+    # This gives us a reliable fallback if Gemini is unavailable.
+    baseline_recommendations = generate_recommendations(
         state["project_data"],
         state["risk_input_data"],
         state["swot"],
         state["feasibility_score"]
     )
 
+    # Enhance the baseline using Gemini.
+    llm_recommendations = generate_llm_recommendations(
+        project_data=state["project_data"],
+        risk_input_data=state["risk_input_data"],
+        swot=state["swot"],
+        feasibility_score=state["feasibility_score"],
+        market_data=state.get("market_data", {}),
+        risk_data=state.get("risk_data", []),
+        base_recommendations=baseline_recommendations
+    )
+
     return {
-        "recommendations": recommendations
+        "recommendations": llm_recommendations
     }
 
 
