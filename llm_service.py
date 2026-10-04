@@ -424,3 +424,307 @@ Return ONLY the requested structured JSON.
     print("✅ Gemini AI generated recommendations")
 
     return result
+
+def generate_llm_mitigation(
+    project_data,
+    risk_data,
+    risk_input_data,
+    swot,
+    feasibility_score,
+    base_mitigation=None
+):
+    """
+    Generate M3 risk mitigation strategies using Gemini.
+    """
+
+    # --------------------------------------------------------
+    # DEMO MODE
+    # --------------------------------------------------------
+
+    if not is_llm_available():
+
+        print("⚠️ Using Demo Mode mitigation strategies")
+
+        return base_mitigation or []
+
+    # --------------------------------------------------------
+    # GEMINI SCHEMA
+    # --------------------------------------------------------
+
+    schema = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "risk": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "impact": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "mitigation_strategy": {
+                    "type": "string"
+                },
+                "preventive_action": {
+                    "type": "string"
+                },
+                "contingency_action": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "risk",
+                "category",
+                "description",
+                "impact",
+                "priority",
+                "mitigation_strategy",
+                "preventive_action",
+                "contingency_action"
+            ]
+        }
+    }
+
+    # --------------------------------------------------------
+    # PROMPT
+    # --------------------------------------------------------
+
+    prompt = f"""
+You are the Risk Mitigation Engine for a
+Startup & Project Risk Analyzer.
+
+Analyze the supplied project and identified risks.
+
+For every major identified risk, generate a practical
+mitigation strategy.
+
+IMPORTANT:
+- Use only the supplied project information.
+- Do not invent facts.
+- Focus on the identified risks.
+- Do not create random unrelated risks.
+- Prioritize high-impact risks.
+- Recommendations must be practical and actionable.
+- Preventive actions should reduce the probability of the risk.
+- Contingency actions should explain what to do if the risk occurs.
+
+PROJECT INFORMATION:
+{json.dumps(project_data, indent=2, default=str)}
+
+RISK INPUTS:
+{json.dumps(risk_input_data, indent=2, default=str)}
+
+RISK DATA:
+{json.dumps(risk_data, indent=2, default=str)}
+
+SWOT:
+{json.dumps(swot, indent=2, default=str)}
+
+FEASIBILITY SCORE:
+{json.dumps(feasibility_score, indent=2, default=str)}
+
+BASELINE MITIGATION:
+{json.dumps(base_mitigation or [], indent=2, default=str)}
+
+For every major risk return:
+
+- risk
+- category
+- description
+- impact
+- priority
+- mitigation_strategy
+- preventive_action
+- contingency_action
+
+Return ONLY valid structured JSON.
+"""
+
+    result = _generate_json(prompt, schema)
+
+    # --------------------------------------------------------
+    # FALLBACK
+    # --------------------------------------------------------
+
+    if result is None:
+
+        print("⚠️ Gemini unavailable — using fallback mitigation strategies")
+
+        return base_mitigation or []
+
+    print("✅ Gemini AI generated mitigation strategies")
+
+    return result
+
+def generate_llm_improvements(
+    project_data,
+    risk_input_data,
+    swot,
+    feasibility_score,
+    market_data=None,
+    risk_data=None,
+    mitigation_results=None,
+    base_improvements=None
+):
+    """
+    Generate M3 project improvement suggestions using Gemini.
+    """
+
+    # --------------------------------------------------------
+    # DEMO MODE
+    # --------------------------------------------------------
+
+    if not is_llm_available():
+
+        print("⚠️ Using Demo Mode improvement suggestions")
+
+        return base_improvements or []
+
+    # --------------------------------------------------------
+    # GEMINI SCHEMA
+    # --------------------------------------------------------
+
+    schema = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "problem": {
+                    "type": "string"
+                },
+                "improvement": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "steps": {
+                    "type": "string"
+                },
+                "expected_benefit": {
+                    "type": "string"
+                },
+                "risk_reduction": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "title",
+                "category",
+                "priority",
+                "problem",
+                "improvement",
+                "reason",
+                "steps",
+                "expected_benefit",
+                "risk_reduction"
+            ]
+        }
+    }
+
+    # --------------------------------------------------------
+    # PROMPT
+    # --------------------------------------------------------
+
+    prompt = f"""
+You are the Project Improvement Suggestion Engine for a
+Startup & Project Risk Analyzer.
+
+Analyze the project, risks, SWOT, feasibility,
+market information and mitigation strategies.
+
+Generate practical improvements that can make the project
+more viable, competitive and executable.
+
+Organize improvements under these categories:
+
+- Product
+- Market
+- Technical
+- Financial
+- Operational
+- Marketing
+
+IMPORTANT:
+- Do not invent facts.
+- Improvements must be relevant to the supplied project.
+- Improvements should address weaknesses, risks or opportunities.
+- Avoid generic motivational advice.
+- Prioritize improvements with the greatest practical impact.
+- Explain why each improvement matters.
+- Explain the expected benefit.
+- Explain how it can reduce project risk where applicable.
+
+PROJECT INFORMATION:
+{json.dumps(project_data, indent=2, default=str)}
+
+RISK INPUTS:
+{json.dumps(risk_input_data, indent=2, default=str)}
+
+IDENTIFIED RISKS:
+{json.dumps(risk_data or [], indent=2, default=str)}
+
+SWOT:
+{json.dumps(swot, indent=2, default=str)}
+
+FEASIBILITY SCORE:
+{json.dumps(feasibility_score, indent=2, default=str)}
+
+MARKET DATA:
+{json.dumps(market_data or {}, indent=2, default=str)}
+
+MITIGATION STRATEGIES:
+{json.dumps(mitigation_results or [], indent=2, default=str)}
+
+BASELINE IMPROVEMENTS:
+{json.dumps(base_improvements or [], indent=2, default=str)}
+
+For every improvement return:
+
+- title
+- category
+- priority
+- problem
+- improvement
+- reason
+- steps
+- expected_benefit
+- risk_reduction
+
+Return ONLY valid structured JSON.
+"""
+
+    result = _generate_json(prompt, schema)
+
+    # --------------------------------------------------------
+    # FALLBACK
+    # --------------------------------------------------------
+
+    if result is None:
+
+        print("⚠️ Gemini unavailable — using fallback improvement suggestions")
+
+        return base_improvements or []
+
+    print("✅ Gemini AI generated improvement suggestions")
+
+    return result
+

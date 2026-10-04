@@ -7,7 +7,11 @@ import database
 
 
 from recommendation_engine import generate_recommendations
-from llm_service import generate_llm_recommendations
+from llm_service import (
+    generate_llm_recommendations,
+    generate_llm_mitigation,
+    generate_llm_improvements
+)
 
 try:
     from langgraph.graph import StateGraph, START, END
@@ -163,8 +167,6 @@ def analyze_risks(state: M3WorkflowState):
 def generate_recommendation_node(state: M3WorkflowState):
     """Node 3: Generate strategic recommendations using Gemini."""
 
-    # First generate the deterministic baseline.
-    # This gives us a reliable fallback if Gemini is unavailable.
     baseline_recommendations = generate_recommendations(
         state["project_data"],
         state["risk_input_data"],
@@ -172,7 +174,6 @@ def generate_recommendation_node(state: M3WorkflowState):
         state["feasibility_score"]
     )
 
-    # Enhance the baseline using Gemini.
     llm_recommendations = generate_llm_recommendations(
         project_data=state["project_data"],
         risk_input_data=state["risk_input_data"],
@@ -189,21 +190,31 @@ def generate_recommendation_node(state: M3WorkflowState):
 
 
 def generate_mitigation_node(state: M3WorkflowState):
-    """Node 4: Generate risk mitigation strategies."""
+    """Node 4: Generate risk mitigation strategies using Gemini."""
 
-    mitigation_results = generate_mitigation(
+    baseline_mitigation = generate_mitigation(
         state["risk_data"]
     )
 
+    llm_mitigation = generate_llm_mitigation(
+        project_data=state["project_data"],
+        risk_data=state["risk_data"],
+        risk_input_data=state["risk_input_data"],
+        swot=state["swot"],
+        feasibility_score=state["feasibility_score"],
+        base_mitigation=baseline_mitigation
+    )
+
     return {
-        "mitigation_results": mitigation_results
+        "mitigation_results": llm_mitigation
     }
 
 
-def generate_improvements_node(state: M3WorkflowState):
-    """Node 5: Generate project improvement suggestions."""
 
-    improvement_results = generate_improvements(
+def generate_improvements_node(state: M3WorkflowState):
+    """Node 5: Generate project improvements using Gemini."""
+
+    baseline_improvements = generate_improvements(
         state["project_data"],
         state["risk_input_data"],
         state["swot"],
@@ -212,8 +223,19 @@ def generate_improvements_node(state: M3WorkflowState):
         mitigation_results=state.get("mitigation_results", [])
     )
 
+    llm_improvements = generate_llm_improvements(
+        project_data=state["project_data"],
+        risk_input_data=state["risk_input_data"],
+        swot=state["swot"],
+        feasibility_score=state["feasibility_score"],
+        market_data=state.get("market_data", {}),
+        risk_data=state.get("risk_data", []),
+        mitigation_results=state.get("mitigation_results", []),
+        base_improvements=baseline_improvements
+    )
+
     return {
-        "improvement_results": improvement_results
+        "improvement_results": llm_improvements
     }
 
 
