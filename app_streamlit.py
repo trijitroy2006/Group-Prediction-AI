@@ -1456,189 +1456,6 @@ with tab4:
 
     st.divider()
 
-    # ========================================================
-    # MITIGATION STRATEGIES
-    # ========================================================
-
-    st.subheader("Risk Mitigation Strategies")
-
-    if mitigation_results:
-
-        for mitigation in mitigation_results:
-
-            risk_name = mitigation.get(
-                "risk",
-                "Unknown Risk"
-            )
-
-            category = mitigation.get(
-                "category",
-                "General"
-            )
-
-            impact = mitigation.get(
-                "impact",
-                "Unknown"
-            )
-
-            strategy = mitigation.get(
-                "mitigation_strategy",
-                "N/A"
-            )
-
-            preventive = mitigation.get(
-                "preventive_action",
-                "N/A"
-            )
-
-            contingency = mitigation.get(
-                "contingency_action",
-                "N/A"
-            )
-
-            with st.expander(
-                f"ΓÜá∩╕Å {risk_name} ΓÇö {impact} Impact"
-            ):
-
-                st.markdown(
-                    f"**Category:** {category}"
-                )
-
-                st.markdown(
-                    f"**Mitigation Strategy:** {strategy}"
-                )
-
-                st.markdown(
-                    f"**Preventive Action:** {preventive}"
-                )
-
-                st.markdown(
-                    f"**Contingency Action:** {contingency}"
-                )
-
-    else:
-        st.info(
-            "No mitigation strategies are currently available."
-        )
-
-    st.divider()
-
-    # ========================================================
-    # IMPROVEMENT PLAN
-    # ========================================================
-
-    st.subheader("Project Improvement Plan")
-
-    if improvement_results:
-
-        improvement_cols = st.columns(3)
-
-        for index, improvement in enumerate(
-            improvement_results
-        ):
-
-            with improvement_cols[
-                index % 3
-            ]:
-
-                title = improvement.get(
-                    "title",
-                    "Improvement"
-                )
-
-                category = improvement.get(
-                    "category",
-                    "General"
-                )
-
-                priority = improvement.get(
-                    "priority",
-                    "Medium"
-                )
-
-                problem = improvement.get(
-                    "problem",
-                    ""
-                )
-
-                steps = improvement.get(
-                    "steps",
-                    []
-                )
-
-                risk_reduction = improvement.get(
-                    "risk_reduction",
-                    ""
-                )
-
-                st.markdown(
-                    f"""
-                    <div style="
-                        border: 1px solid #E5E7EB;
-                        border-radius: 12px;
-                        padding: 18px;
-                        margin-bottom: 16px;
-                        min-height: 230px;
-                        background: white;
-                    ">
-
-                    <div style="
-                        color: #6D28D9;
-                        font-size: 13px;
-                        font-weight: 700;
-                        text-transform: uppercase;
-                    ">
-                        {category}
-                    </div>
-
-                    <h4 style="
-                        margin: 8px 0;
-                        color: #111827;
-                    ">
-                        {title}
-                    </h4>
-
-                    <div style="
-                        color: #6B7280;
-                        font-size: 14px;
-                    ">
-                        Priority: <b>{priority}</b>
-                    </div>
-
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-                if problem:
-                    st.markdown(
-                        f"**Problem:** {problem}"
-                    )
-
-                if steps:
-
-                    st.markdown("**Action Steps:**")
-
-                    for step in steps:
-                        st.markdown(
-                            f"- {step}"
-                        )
-
-                if risk_reduction:
-                    st.markdown(
-                        f"**Expected Risk Reduction:** "
-                        f"{risk_reduction}"
-                    )
-
-    else:
-        st.info(
-            "No improvement suggestions are currently available."
-        )
-
-    st.divider()
-
-    # ========================================================
-
     if not st.session_state.get('has_analyzed', False):
         st.info("💡 Please enter project details and click 'Analyze Project' to view the Dashboard.")
     else:
@@ -1876,4 +1693,188 @@ with tab4:
                 <span style="color: #4B5563; font-size: 15px;">{item}</span>
             </div>''' for idx, item in enumerate(report.get('next_steps', []))])}
             ''', unsafe_allow_html=True)
+
+    # ========================================================
+    # MITIGATION STRATEGIES
+    # ========================================================
+
+    st.subheader("Risk Mitigation Strategies")
+
+    if mitigation_results:
+
+        for mitigation in mitigation_results:
+
+            risk_name = mitigation.get(
+                "risk",
+                "Unknown Risk"
+            )
+
+            category = mitigation.get(
+                "category",
+                "General"
+            )
+
+            impact = mitigation.get(
+                "impact",
+                "Unknown"
+            )
+
+            strategy = mitigation.get(
+                "mitigation_strategy",
+                "N/A"
+            )
+
+            preventive = mitigation.get(
+                "preventive_action",
+                "N/A"
+            )
+
+            contingency = mitigation.get(
+                "contingency_action",
+                "N/A"
+            )
+
+            with st.expander(
+                f"⚠️ {risk_name} - {impact} Impact"
+            ):
+
+                st.markdown(
+                    f"**Category:** {category}"
+                )
+
+                st.markdown(
+                    f"**Mitigation Strategy:** {strategy}"
+                )
+
+                st.markdown(
+                    f"**Preventive Action:** {preventive}"
+                )
+
+                st.markdown(
+                    f"**Contingency Action:** {contingency}"
+                )
+
+    else:
+        st.info(
+            "No mitigation strategies are currently available."
+        )
+
+    st.divider()
+
+    # ========================================================
+    # IMPROVEMENT PLAN
+    # ========================================================
+
+    st.subheader("Project Improvement Plan")
+
+    if improvement_results:
+
+        improvement_cols = st.columns(3)
+
+        for index, improvement in enumerate(
+            improvement_results
+        ):
+
+            with improvement_cols[
+                index % 3
+            ]:
+
+                title = improvement.get(
+                    "title",
+                    "Improvement"
+                )
+
+                category = improvement.get(
+                    "category",
+                    "General"
+                )
+
+                priority = improvement.get(
+                    "priority",
+                    "Medium"
+                )
+
+                problem = improvement.get(
+                    "problem",
+                    ""
+                )
+
+                steps = improvement.get(
+                    "steps",
+                    []
+                )
+
+                risk_reduction = improvement.get(
+                    "risk_reduction",
+                    ""
+                )
+
+                st.markdown(
+                    f"""
+                    <div style="
+                        border: 1px solid #E5E7EB;
+                        border-radius: 12px;
+                        padding: 18px;
+                        margin-bottom: 16px;
+                        min-height: 230px;
+                        background: white;
+                    ">
+
+                    <div style="
+                        color: #6D28D9;
+                        font-size: 13px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                    ">
+                        {category}
+                    </div>
+
+                    <h4 style="
+                        margin: 8px 0;
+                        color: #111827;
+                    ">
+                        {title}
+                    </h4>
+
+                    <div style="
+                        color: #6B7280;
+                        font-size: 14px;
+                    ">
+                        Priority: <b>{priority}</b>
+                    </div>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                if problem:
+                    st.markdown(
+                        f"**Problem:** {problem}"
+                    )
+
+                if steps:
+
+                    st.markdown("**Action Steps:**")
+
+                    for step in steps:
+                        st.markdown(
+                            f"- {step}"
+                        )
+
+                if risk_reduction:
+                    st.markdown(
+                        f"**Expected Risk Reduction:** "
+                        f"{risk_reduction}"
+                    )
+
+    else:
+        st.info(
+            "No improvement suggestions are currently available."
+        )
+
+    st.divider()
+
+    # ========================================================
+
 
