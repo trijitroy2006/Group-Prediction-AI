@@ -32,36 +32,70 @@ def is_llm_available():
 # GEMINI JSON GENERATION
 # ============================================================
 
+import time
+
+
 def _generate_json(prompt, schema):
     """
     Send a prompt to Gemini and return structured JSON.
-
-    Returns:
-        dict | None
+    Retries transient 503/429 errors.
     """
 
     if not _client:
         return None
 
-    try:
-        response = _client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=schema,
-                temperature=0.4,
-            ),
-        )
+    max_attempts = 4
 
-        if not response.text:
+    for attempt in range(max_attempts):
+        try:
+            response = _client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=schema,
+                    temperature=0.4,
+                ),
+            )
+
+            if not response.text:
+                return None
+
+            return json.loads(response.text)
+
+        except Exception as error:
+
+            error_text = str(error)
+
+            # Retry temporary server/rate-limit errors
+            if "503" in error_text or "UNAVAILABLE" in error_text:
+                wait_time = 2 ** attempt
+
+                print(
+                    f"Gemini temporarily unavailable. "
+                    f"Retrying in {wait_time} seconds..."
+                )
+
+                time.sleep(wait_time)
+                continue
+
+            if "429" in error_text or "RESOURCE_EXHAUSTED" in error_text:
+                wait_time = 2 ** attempt
+
+                print(
+                    f"Gemini rate limit reached. "
+                    f"Retrying in {wait_time} seconds..."
+                )
+
+                time.sleep(wait_time)
+                continue
+
+            # Don't retry permanent errors
+            print(f"Gemini API error: {error}")
             return None
 
-        return json.loads(response.text)
-
-    except Exception as error:
-        print(f"Gemini API error: {error}")
-        return None
+    print("Gemini request failed after all retry attempts.")
+    return None
 
 
 # ============================================================
@@ -386,5 +420,7 @@ Return ONLY the requested structured JSON.
         }
 
     result["mode"] = "GEMINI"
+
+    print("✅ Gemini AI generated recommendations")
 
     return result
