@@ -1,4 +1,4 @@
-# 📊 Prediction AI — Collaborative Market Intelligence & Risk Analysis Platform
+# Prediction AI
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://prediction-ai-app.streamlit.app/)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
