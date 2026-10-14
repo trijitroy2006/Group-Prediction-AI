@@ -132,7 +132,6 @@ Group-Prediction-AI/
    ```bash
    python -m streamlit run app_streamlit.py
    ```
-   Open your browser at `http://localhost:8501`.
 
 ---
 
