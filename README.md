@@ -1,10 +1,5 @@
 # Prediction AI
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://prediction-ai-app.streamlit.app/)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
-[![Google Gemini](https://img.shields.io/badge/AI-Google%20Gemini%20API-4285F4?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
-[![SQLite](https://img.shields.io/badge/Database-SQLite3-003B57?style=flat&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-
 ---
 
 ## 🚀 Live Application
@@ -138,6 +133,23 @@ Group-Prediction-AI/
    python -m streamlit run app_streamlit.py
    ```
    Open your browser at `http://localhost:8501`.
+
+---
+
+## 👩‍🏫 Mentorship & Guidance
+We extend our deepest gratitude to our mentor, **Mrs. Sophia**, under whose guidance, leadership, and continuous support we successfully developed and completed this entire project.
+
+---
+
+## 👥 Project Contributors
+This project was collaboratively engineered by:
+* **Rabjyotsingh Majethiya**
+* **Ruchita Jagdish Chaudhari**
+* **S.A.R.V. Likhith**
+* **Sachin Chaubey**
+* **Shravani Gajanan Hiwase**
+* **Trijit Roy**
+* **Vegi Sangeetha**
 
 ---
 
